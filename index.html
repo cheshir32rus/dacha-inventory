@@ -3,710 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Инвентаризация — Кафе «Дача»</title>
+<title>Инвентаризация v3.0 — Кафе «Дача»</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, writeBatch, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getDatabase, ref, set, onDisconnect, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFyCoMBSta6AYE68IH1ukGEgLSJRki0G4",
+    authDomain: "inv-dacha-2026.firebaseapp.com",
+    projectId: "inv-dacha-2026",
+    storageBucket: "inv-dacha-2026.firebasestorage.app",
+    messagingSenderId: "933996279677",
+    appId: "1:933996279677:web:00d763e6a3ee36e133be14"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  window.db = getFirestore(app);
+  window.rtdb = getDatabase(app);
+  window.fb = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, writeBatch, setDoc, getDoc, where, ref, set, onDisconnect, onValue, remove };
+  window.fbReady = true;
+  if (window.onFirebaseReady) window.onFirebaseReady();
+</script>
 <style>
   :root {
-    --bg-primary: #0f0f1a;
-    --bg-secondary: #1a1a2e;
-    --bg-card: #16162a;
-    --bg-input: #252540;
-    --text-primary: #e8e8f0;
-    --text-secondary: #a0a0b8;
-    --text-muted: #6a6a80;
-    --accent: #e94560;
-    --accent-hover: #d63d56;
-    --accent-light: #ff6b8a;
-    --border: #2a2a45;
-    --success: #2ecc71;
-    --warning: #f39c12;
-    --danger: #e74c3c;
-    --shadow: rgba(0,0,0,0.4);
+    --bg-primary: #0f0f1a; --bg-secondary: #1a1a2e; --bg-card: #16162a; --bg-input: #252540;
+    --text-primary: #e8e8f0; --text-secondary: #a0a0b8; --text-muted: #6a6a80;
+    --accent: #e94560; --accent-hover: #d63d56; --accent-light: #ff6b8a;
+    --border: #2a2a45; --success: #2ecc71; --warning: #f39c12; --danger: #e74c3c; --info: #3498db;
+    --shadow: rgba(0,0,0,0.4); --online: #2ecc71;
   }
-
   [data-theme="light"] {
-    --bg-primary: #f0f2f5;
-    --bg-secondary: #ffffff;
-    --bg-card: #ffffff;
-    --bg-input: #f5f5f5;
-    --text-primary: #1a1a2e;
-    --text-secondary: #555566;
-    --text-muted: #888899;
-    --accent: #e94560;
-    --accent-hover: #d63d56;
-    --accent-light: #ff6b8a;
-    --border: #e0e0e8;
-    --shadow: rgba(0,0,0,0.08);
+    --bg-primary: #f0f2f5; --bg-secondary: #ffffff; --bg-card: #ffffff; --bg-input: #f5f5f5;
+    --text-primary: #1a1a2e; --text-secondary: #555566; --text-muted: #888899;
+    --accent: #e94560; --accent-hover: #d63d56; --accent-light: #ff6b8a;
+    --border: #e0e0e8; --shadow: rgba(0,0,0,0.08); --online: #27ae60;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    min-height: 100vh;
-    -webkit-text-size-adjust: 100%;
-    transition: background 0.3s, color 0.3s;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; -webkit-text-size-adjust: 100%; transition: background 0.3s, color 0.3s; }
 
-  .login-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: var(--bg-primary);
-    padding: 20px;
-    transition: background 0.3s;
-  }
-  .login-logo {
-    font-size: 48px;
-    margin-bottom: 10px;
-  }
-  .login-screen h1 {
-    color: var(--accent);
-    font-size: 26px;
-    margin-bottom: 6px;
-    text-align: center;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  .login-screen .subtitle {
-    color: var(--text-muted);
-    font-size: 13px;
-    margin-bottom: 35px;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-  .login-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 35px 28px;
-    width: 100%;
-    max-width: 360px;
-    box-shadow: 0 10px 40px var(--shadow);
-    transition: all 0.3s;
-  }
-  .login-box input {
-    width: 100%;
-    padding: 16px 18px;
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    background: var(--bg-input);
-    color: var(--text-primary);
-    font-size: 16px;
-    margin-bottom: 14px;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+  .login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-primary); padding: 20px; transition: background 0.3s; }
+  .login-logo { font-size: 48px; margin-bottom: 10px; }
+  .login-screen h1 { color: var(--accent); font-size: 26px; margin-bottom: 6px; text-align: center; font-weight: 700; letter-spacing: 0.5px; }
+  .login-screen .subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 35px; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+  .login-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 35px 28px; width: 100%; max-width: 360px; box-shadow: 0 10px 40px var(--shadow); transition: all 0.3s; }
+  .login-box input { width: 100%; padding: 16px 18px; border: 2px solid var(--border); border-radius: 14px; background: var(--bg-input); color: var(--text-primary); font-size: 16px; margin-bottom: 14px; outline: none; transition: border-color 0.2s, background 0.2s; -webkit-appearance: none; appearance: none; }
   .login-box input:focus { border-color: var(--accent); background: var(--bg-secondary); }
   .login-box input::placeholder { color: var(--text-muted); }
-  .login-box button {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 14px;
-    background: var(--accent);
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    -webkit-appearance: none;
-    appearance: none;
-    touch-action: manipulation;
-    letter-spacing: 0.5px;
-  }
+  .login-box button { width: 100%; padding: 16px; border: none; border-radius: 14px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; -webkit-appearance: none; appearance: none; touch-action: manipulation; letter-spacing: 0.5px; }
   .login-box button:active { background: var(--accent-hover); transform: scale(0.97); }
-  .role-selector {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .role-btn {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .role-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(233,69,96,0.08);
-  }
-  .error-msg {
-    color: var(--danger);
-    font-size: 13px;
-    text-align: center;
-    margin-top: 12px;
-    display: none;
-    min-height: 20px;
-    font-weight: 500;
-  }
+  .login-box button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .role-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+  .role-btn { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 12px; background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; touch-action: manipulation; -webkit-appearance: none; appearance: none; }
+  .role-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(233,69,96,0.08); }
+  .error-msg { color: var(--danger); font-size: 13px; text-align: center; margin-top: 12px; display: none; min-height: 20px; font-weight: 500; }
+  .status-msg { color: var(--info); font-size: 12px; text-align: center; margin-top: 8px; min-height: 18px; font-weight: 500; }
 
   .app { display: none; }
-  .app-header {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    padding: 14px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 15px var(--shadow);
-    border-bottom: 1px solid var(--border);
-    transition: all 0.3s;
-  }
+  .app-header { background: var(--bg-secondary); color: var(--text-primary); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 15px var(--shadow); border-bottom: 1px solid var(--border); transition: all 0.3s; }
   .app-header h1 { font-size: 17px; color: var(--accent); font-weight: 700; }
-  .app-header .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .app-header .user-info {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-align: right;
-    line-height: 1.4;
-  }
-  .app-header .user-info .role-badge {
-    display: inline-block;
-    background: var(--accent);
-    color: #fff;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .icon-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: all 0.2s;
-  }
+  .app-header .header-actions { display: flex; align-items: center; gap: 10px; }
+  .app-header .user-info { font-size: 11px; color: var(--text-muted); text-align: right; line-height: 1.4; }
+  .app-header .user-info .role-badge { display: inline-block; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .online-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--online); font-weight: 600; margin-top: 2px; }
+  .online-dot { width: 6px; height: 6px; background: var(--online); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .icon-btn { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); width: 36px; height: 36px; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; -webkit-appearance: none; appearance: none; transition: all 0.2s; }
   .icon-btn:active { background: var(--bg-input); }
 
-  .tabs {
-    display: flex;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 57px;
-    z-index: 99;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    transition: all 0.3s;
-  }
-  .tab {
-    flex: 1;
-    min-width: 70px;
-    padding: 14px 8px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-    touch-action: manipulation;
-  }
-  .tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-    background: rgba(233,69,96,0.05);
-  }
+  .tabs { display: flex; background: var(--bg-secondary); border-bottom: 1px solid var(--border); position: sticky; top: 57px; z-index: 99; overflow-x: auto; -webkit-overflow-scrolling: touch; transition: all 0.3s; }
+  .tab { flex: 1; min-width: 70px; padding: 14px 8px; text-align: center; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; touch-action: manipulation; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(233,69,96,0.05); }
 
   .tab-content { display: none; padding: 16px; padding-bottom: 120px; }
   .tab-content.active { display: block; }
 
-  .card {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 14px;
-    box-shadow: 0 2px 12px var(--shadow);
-    border: 1px solid var(--border);
-    transition: all 0.3s;
-  }
-  .card h3 {
-    font-size: 15px;
-    color: var(--text-primary);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-  }
+  .card { background: var(--bg-card); border-radius: 16px; padding: 20px; margin-bottom: 14px; box-shadow: 0 2px 12px var(--shadow); border: 1px solid var(--border); transition: all 0.3s; }
+  .card h3 { font-size: 15px; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
   .form-row { margin-bottom: 14px; }
-  .form-row label {
-    display: block;
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .form-row input, .form-row select {
-    width: 100%;
-    padding: 14px 16px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    font-size: 15px;
-    outline: none;
-    background: var(--bg-input);
-    color: var(--text-primary);
-    transition: border-color 0.2s, background 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .form-row input:focus, .form-row select:focus {
-    border-color: var(--accent);
-    background: var(--bg-secondary);
-  }
+  .form-row label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-row input, .form-row select { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-size: 15px; outline: none; background: var(--bg-input); color: var(--text-primary); transition: border-color 0.2s, background 0.2s; -webkit-appearance: none; appearance: none; }
+  .form-row input:focus, .form-row select:focus { border-color: var(--accent); background: var(--bg-secondary); }
   .form-row input::placeholder { color: var(--text-muted); }
   .qty-row { display: flex; gap: 12px; }
   .qty-row .form-row:first-child { flex: 2; }
   .qty-row .form-row:last-child { flex: 1; }
-  .btn-primary {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 14px;
-    background: var(--accent);
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    -webkit-appearance: none;
-    appearance: none;
-    touch-action: manipulation;
-    letter-spacing: 0.5px;
-  }
+  .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; -webkit-appearance: none; appearance: none; touch-action: manipulation; letter-spacing: 0.5px; }
   .btn-primary:active { background: var(--accent-hover); transform: scale(0.98); }
-  .btn-secondary {
-    width: 100%;
-    padding: 14px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; background: transparent; color: var(--text-secondary); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; touch-action: manipulation; -webkit-appearance: none; appearance: none; }
   .btn-secondary:active { background: var(--bg-input); }
 
-  .search-box {
-    position: relative;
-    margin-bottom: 14px;
-  }
-  .search-box input {
-    width: 100%;
-    padding: 14px 16px 14px 44px;
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    background: var(--bg-input);
-    color: var(--text-primary);
-    font-size: 15px;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+  .search-box { position: relative; margin-bottom: 14px; }
+  .search-box input { width: 100%; padding: 14px 16px 14px 44px; border: 2px solid var(--border); border-radius: 14px; background: var(--bg-input); color: var(--text-primary); font-size: 15px; outline: none; -webkit-appearance: none; appearance: none; }
   .search-box input:focus { border-color: var(--accent); }
-  .search-box::before {
-    content: "🔍";
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    opacity: 0.5;
-  }
-  .search-results {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--bg-card);
-    margin-bottom: 14px;
-  }
-  .search-item {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.15s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  .search-box::before { content: "🔍"; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: 0.5; }
+  .search-results { max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); margin-bottom: 14px; }
+  .search-item { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; display: flex; justify-content: space-between; align-items: center; }
   .search-item:last-child { border-bottom: none; }
   .search-item:active { background: var(--bg-input); }
   .search-item .si-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
   .search-item .si-cat { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .search-item .si-type {
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    background: var(--bg-input);
-    color: var(--text-secondary);
-    font-weight: 600;
-  }
+  .search-item .si-type { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: var(--bg-input); color: var(--text-secondary); font-weight: 600; }
 
-  .selected-item {
-    background: rgba(233,69,96,0.08);
-    border: 2px solid var(--accent);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  .selected-item { background: rgba(233,69,96,0.08); border: 2px solid var(--accent); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
   .selected-item .si-info { flex: 1; }
   .selected-item .si-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
   .selected-item .si-cat { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-  .selected-item .si-change {
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: rgba(233,69,96,0.1);
-  }
+  .selected-item .si-change { color: var(--accent); font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 8px; background: rgba(233,69,96,0.1); }
 
-  .filter-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-    overflow-x: auto;
-    padding-bottom: 5px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .filter-chip {
-    padding: 8px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-secondary);
-    font-size: 12px;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-    font-weight: 600;
-  }
-  .filter-chip.active {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
-  }
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
+  .filter-chip { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); font-size: 12px; white-space: nowrap; cursor: pointer; transition: all 0.2s; touch-action: manipulation; -webkit-appearance: none; appearance: none; font-weight: 600; }
+  .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-  /* Стили для итогов с нулями */
-  .summary-card {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 16px 18px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 12px var(--shadow);
-    border: 1px solid var(--border);
-    transition: all 0.3s;
-  }
-  .summary-card.has-data {
-    border-left: 4px solid var(--accent);
-  }
-  .summary-card.no-data {
-    border-left: 4px solid var(--border);
-    opacity: 0.7;
-  }
-  .summary-card .item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .summary-card .item-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-    flex: 1;
-  }
-  .summary-card .item-total {
-    font-size: 16px;
-    font-weight: 800;
-    margin-left: 10px;
-  }
+  .type-filter-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+  .type-chip { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg-card); color: var(--text-secondary); font-size: 13px; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: 600; touch-action: manipulation; -webkit-appearance: none; appearance: none; }
+  .type-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(233,69,96,0.08); }
+
+  .summary-card { background: var(--bg-card); border-radius: 16px; padding: 16px 18px; margin-bottom: 10px; box-shadow: 0 2px 12px var(--shadow); border: 1px solid var(--border); transition: all 0.3s; }
+  .summary-card.has-data { border-left: 4px solid var(--accent); }
+  .summary-card.no-data { border-left: 4px solid var(--border); opacity: 0.7; }
+  .summary-card .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .summary-card .item-name { font-size: 14px; font-weight: 600; color: var(--text-primary); flex: 1; }
+  .summary-card .item-total { font-size: 16px; font-weight: 800; margin-left: 10px; }
   .summary-card .item-total.has-value { color: var(--accent); }
   .summary-card .item-total.zero { color: var(--text-muted); font-size: 14px; }
-  .summary-card .item-meta {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .summary-card .item-cat {
-    font-size: 10px;
-    color: var(--text-muted);
-    background: var(--bg-input);
-    padding: 3px 10px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .summary-card .item-type {
-    font-size: 10px;
-    color: var(--accent);
-    background: rgba(233,69,96,0.1);
-    padding: 3px 10px;
-    border-radius: 8px;
-    font-weight: 700;
-  }
-  .summary-card .item-status {
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 8px;
-    font-weight: 600;
-  }
-  .summary-card .item-status.done {
-    background: rgba(46,204,113,0.15);
-    color: var(--success);
-  }
-  .summary-card .item-status.missing {
-    background: rgba(243,156,18,0.15);
-    color: var(--warning);
-  }
-  .entries-list {
-    border-top: 1px solid var(--border);
-    padding-top: 8px;
-    margin-top: 8px;
-  }
-  .entry-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-    font-size: 12px;
-  }
+  .summary-card .item-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .summary-card .item-cat { font-size: 10px; color: var(--text-muted); background: var(--bg-input); padding: 3px 10px; border-radius: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .summary-card .item-type { font-size: 10px; color: var(--accent); background: rgba(233,69,96,0.1); padding: 3px 10px; border-radius: 8px; font-weight: 700; }
+  .summary-card .item-status { font-size: 11px; padding: 3px 10px; border-radius: 8px; font-weight: 600; }
+  .summary-card .item-status.done { background: rgba(46,204,113,0.15); color: var(--success); }
+  .summary-card .item-status.missing { background: rgba(243,156,18,0.15); color: var(--warning); }
+  .entries-list { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; }
+  .entry-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; }
   .entry-row .entry-user { color: var(--text-muted); font-size: 11px; }
   .entry-row .entry-qty { font-weight: 700; color: var(--text-primary); }
-  .entry-row .entry-del {
-    margin-left: 8px;
-    color: var(--danger);
-    font-size: 14px;
-    cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
+  .entry-row .entry-del { margin-left: 8px; color: var(--danger); font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
   .entry-row .entry-del:active { background: rgba(231,76,60,0.1); }
 
-  .history-item {
-    background: var(--bg-card);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 8px var(--shadow);
-    border: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.3s;
-  }
+  .history-item { background: var(--bg-card); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 8px var(--shadow); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
   .history-item .h-info { flex: 1; }
-  .history-item .h-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 3px;
-  }
+  .history-item .h-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
   .history-item .h-meta { font-size: 11px; color: var(--text-muted); }
-  .history-item .h-qty {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--accent);
-    margin-left: 10px;
-  }
-  .history-item .h-del {
-    margin-left: 10px;
-    background: rgba(231,76,60,0.1);
-    color: var(--danger);
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+  .history-item .h-qty { font-size: 15px; font-weight: 800; color: var(--accent); margin-left: 10px; }
+  .history-item .h-del { margin-left: 10px; background: rgba(231,76,60,0.1); color: var(--danger); border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; -webkit-appearance: none; appearance: none; }
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .stat-box {
-    background: var(--bg-card);
-    border-radius: 14px;
-    padding: 16px;
-    text-align: center;
-    box-shadow: 0 2px 12px var(--shadow);
-    border: 1px solid var(--border);
-    transition: all 0.3s;
-  }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-box { background: var(--bg-card); border-radius: 14px; padding: 16px; text-align: center; box-shadow: 0 2px 12px var(--shadow); border: 1px solid var(--border); transition: all 0.3s; }
   .stat-box .stat-num { font-size: 24px; font-weight: 800; color: var(--accent); }
   .stat-box .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  .report-card {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 12px var(--shadow);
-    border: 1px solid var(--border);
-    transition: all 0.3s;
-  }
-  .report-card .r-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  .report-card .r-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .report-card .r-count {
-    font-size: 13px;
-    color: var(--accent);
-    font-weight: 700;
-    background: rgba(233,69,96,0.1);
-    padding: 4px 12px;
-    border-radius: 10px;
-  }
-  .report-card .r-items {
-    font-size: 12px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-  }
+  .online-panel { background: var(--bg-card); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 2px 12px var(--shadow); border: 1px solid var(--border); }
+  .online-panel h4 { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700; }
+  .online-user { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: rgba(46,204,113,0.1); color: var(--online); font-size: 12px; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
+  .online-user .dot { width: 6px; height: 6px; background: var(--online); border-radius: 50%; animation: pulse 2s infinite; }
 
-  .empty-state {
-    text-align: center;
-    padding: 50px 20px;
-    color: var(--text-muted);
-  }
+  .report-card { background: var(--bg-card); border-radius: 16px; padding: 18px; margin-bottom: 12px; box-shadow: 0 2px 12px var(--shadow); border: 1px solid var(--border); transition: all 0.3s; }
+  .report-card .r-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .report-card .r-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+  .report-card .r-count { font-size: 13px; color: var(--accent); font-weight: 700; background: rgba(233,69,96,0.1); padding: 4px 12px; border-radius: 10px; }
+  .report-card .r-items { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
   .empty-state .icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
   .empty-state p { font-size: 14px; }
 
-  .success-toast {
-    position: fixed;
-    top: 70px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: var(--success);
-    color: #fff;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 700;
-    z-index: 1000;
-    opacity: 0;
-    transition: all 0.3s;
-    box-shadow: 0 4px 20px rgba(46,204,113,0.3);
-    pointer-events: none;
-    white-space: nowrap;
-  }
-  .success-toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
+  .success-toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--success); color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; z-index: 1000; opacity: 0; transition: all 0.3s; box-shadow: 0 4px 20px rgba(46,204,113,0.3); pointer-events: none; white-space: nowrap; }
+  .success-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .error-toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--danger); color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; z-index: 1000; opacity: 0; transition: all 0.3s; box-shadow: 0 4px 20px rgba(231,76,60,0.3); pointer-events: none; white-space: nowrap; }
+  .error-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    backdrop-filter: blur(4px);
-  }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
   .modal-overlay.show { display: flex; }
-  .modal-box {
-    background: var(--bg-card);
-    border-radius: 20px;
-    padding: 28px;
-    width: 100%;
-    max-width: 340px;
-    text-align: center;
-    border: 1px solid var(--border);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
+  .modal-box { background: var(--bg-card); border-radius: 20px; padding: 28px; width: 100%; max-width: 340px; text-align: center; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
   .modal-box h3 { margin-bottom: 10px; font-size: 18px; color: var(--text-primary); }
   .modal-box p { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
   .modal-btns { display: flex; gap: 12px; }
-  .modal-btns button {
-    flex: 1;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    touch-action: manipulation;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+  .modal-btns button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; touch-action: manipulation; -webkit-appearance: none; appearance: none; }
   .modal-btns .btn-cancel { background: var(--bg-input); color: var(--text-primary); }
   .modal-btns .btn-confirm { background: var(--danger); color: #fff; }
 
   .staff-only { display: none; }
   .is-staff .staff-only { display: block; }
   .is-staff .chef-only { display: none !important; }
+
+  .sync-status { position: fixed; bottom: 16px; right: 16px; padding: 8px 14px; border-radius: 10px; font-size: 11px; font-weight: 600; z-index: 1000; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+  .sync-status.online { background: rgba(46,204,113,0.15); color: var(--success); }
+  .sync-status.offline { background: rgba(243,156,18,0.15); color: var(--warning); }
+  .sync-status.syncing { background: rgba(52,152,219,0.15); color: var(--info); }
+
+  .weight-warning { background: rgba(243,156,18,0.1); border: 1px solid var(--warning); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: var(--warning); display: none; }
+  .weight-warning.show { display: block; }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -718,7 +205,7 @@
 <div class="login-screen" id="loginScreen">
   <div class="login-logo">📋</div>
   <h1>Инвентаризация</h1>
-  <div class="subtitle">Кафе «Дача» — Кухня</div>
+  <div class="subtitle">Кафе «Дача» — Кухня v3.0</div>
   <div class="login-box">
     <div class="role-selector">
       <button class="role-btn active" onclick="selectRole('chef')" id="roleChef">👨‍🍳 Шеф</button>
@@ -726,8 +213,9 @@
     </div>
     <input type="text" id="userName" placeholder="Ваше имя" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <input type="text" id="userPass" placeholder="Пароль" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="-webkit-text-security: disc;">
-    <button onclick="doLogin()" type="button">Войти в систему</button>
+    <button onclick="doLogin()" type="button" id="loginBtn">Войти в систему</button>
     <div class="error-msg" id="loginError"></div>
+    <div class="status-msg" id="loginStatus">Подключение к серверу...</div>
   </div>
 </div>
 
@@ -738,6 +226,10 @@
       <div class="user-info" id="headerUser">
         <span id="userNameDisplay">Имя</span><br>
         <span class="role-badge" id="userRoleDisplay">ШЕФ</span>
+        <div class="online-badge" id="onlineStatus">
+          <span class="online-dot"></span>
+          <span id="onlineCount">Онлайн: 1</span>
+        </div>
       </div>
       <button class="icon-btn" onclick="toggleTheme()" title="Тема">🌓</button>
       <button class="icon-btn" onclick="doLogout()" title="Выйти">🚪</button>
@@ -748,14 +240,20 @@
     <div class="tab active" onclick="switchTab(0)">➕ Внести</div>
     <div class="tab" onclick="switchTab(1)">📊 Итоги</div>
     <div class="tab" onclick="switchTab(2)">📝 История</div>
-    <div class="tab chef-only" onclick="switchTab(3)">📈 Отчёты</div>
-    <div class="tab chef-only" onclick="switchTab(4)">⚙️ Настройки</div>
+    <div class="tab chef-only" onclick="switchTab(3)">👥 Онлайн</div>
+    <div class="tab chef-only" onclick="switchTab(4)">📈 Отчёты</div>
+    <div class="tab chef-only" onclick="switchTab(5)">⚙️ Настройки</div>
   </div>
 
   <!-- TAB 0: ВНЕСТИ -->
   <div class="tab-content active" id="tab0">
     <div class="card">
       <h3>🔍 Выбрать позицию</h3>
+      <div class="type-filter-bar">
+        <button class="type-chip active" onclick="selectType('all')" id="typeAll">Все</button>
+        <button class="type-chip" onclick="selectType('Товар')" id="typeGoods">Товары</button>
+        <button class="type-chip" onclick="selectType('ПФ')" id="typePF">ПФ</button>
+      </div>
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Начните печатать для поиска..." autocomplete="off" autocorrect="off" spellcheck="false" oninput="searchProducts()">
       </div>
@@ -772,7 +270,7 @@
       <div class="qty-row">
         <div class="form-row">
           <label>Количество</label>
-          <input type="number" id="itemQty" placeholder="0" step="0.001" min="0" inputmode="decimal">
+          <input type="number" id="itemQty" placeholder="0" step="0.001" min="0" inputmode="decimal" oninput="checkWeight()">
         </div>
         <div class="form-row">
           <label>Ед. изм.</label>
@@ -786,11 +284,14 @@
           </select>
         </div>
       </div>
+      <div class="weight-warning" id="weightWarning">
+        ⚠️ Внимание: введённый вес выглядит необычно. Проверьте данные.
+      </div>
       <div class="form-row">
         <label>Примечание</label>
         <input type="text" id="itemNote" placeholder="Например: охлаждённый, замороженный..." autocomplete="off" autocorrect="off" spellcheck="false">
       </div>
-      <button class="btn-primary" onclick="addItem()" type="button">✅ Добавить в инвентаризацию</button>
+      <button class="btn-primary" onclick="addItem()" type="button" id="addBtn">✅ Добавить в инвентаризацию</button>
     </div>
     <div class="card staff-only">
       <p style="text-align:center;color:var(--text-muted);font-size:13px;">
@@ -833,8 +334,24 @@
     <div id="historyList"></div>
   </div>
 
-  <!-- TAB 3: ОТЧЁТЫ -->
+  <!-- TAB 3: ОНЛАЙН -->
   <div class="tab-content" id="tab3">
+    <div class="card">
+      <h3>👥 Кто сейчас в системе</h3>
+      <div id="onlineUsersList">
+        <div class="empty-state"><div class="icon">👥</div><p>Загрузка...</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📋 Журнал входов</h3>
+      <div id="loginLogList">
+        <div class="empty-state"><div class="icon">📋</div><p>Загрузка...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: ОТЧЁТЫ -->
+  <div class="tab-content" id="tab4">
     <div class="stats-grid">
       <div class="stat-box">
         <div class="stat-num" id="reportTotalUsers">0</div>
@@ -848,8 +365,8 @@
     <div id="reportsList"></div>
   </div>
 
-  <!-- TAB 4: НАСТРОЙКИ -->
-  <div class="tab-content" id="tab4">
+  <!-- TAB 5: НАСТРОЙКИ -->
+  <div class="tab-content" id="tab5">
     <div class="card">
       <h3>📤 Экспорт данных</h3>
       <button class="btn-secondary" onclick="exportToCSV()" type="button" style="margin-bottom:10px;">📄 Скачать CSV (Excel)</button>
@@ -858,21 +375,27 @@
     <div class="card">
       <h3>📥 Импорт данных</h3>
       <input type="file" id="importFile" accept=".json" style="margin-bottom:10px;width:100%;font-size:14px;padding:10px;border:2px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text-primary);" onchange="importFromFile(this)">
-      <p style="font-size:12px;color:var(--text-muted);">Загрузите ранее сохранённый .json файл</p>
+      <p style="font-size:12px;color:var(--text-muted);">Загрузите ранее сохранённый .json файл (данные будут добавлены к существующим в облаке)</p>
     </div>
     <div class="card">
       <h3>🗑️ Очистка</h3>
       <button class="btn-secondary" onclick="showClearModal()" type="button" style="border-color:var(--danger);color:var(--danger);">Очистить всю инвентаризацию</button>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:8px;">Удалит ВСЕ записи из облака. Только для шефа.</p>
     </div>
   </div>
 </div>
 
 <div class="success-toast" id="toast">✅ Добавлено!</div>
+<div class="error-toast" id="errorToast">❌ Ошибка!</div>
+<div class="sync-status online" id="syncStatus">
+  <span>🟢</span>
+  <span id="syncText">Онлайн</span>
+</div>
 
 <div class="modal-overlay" id="clearModal">
   <div class="modal-box">
     <h3>⚠️ Внимание</h3>
-    <p>Все данные инвентаризации будут удалены. Это действие нельзя отменить.</p>
+    <p>Все данные инвентаризации будут удалены из облака. Это действие нельзя отменить.</p>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="hideClearModal()" type="button">Отмена</button>
       <button class="btn-confirm" onclick="clearAllData()" type="button">Удалить всё</button>
@@ -890,35 +413,209 @@ const STAFF_PASSWORD = 'staff-dacha-2026';
 
 let currentUser = '';
 let currentRole = 'chef';
-let entries = [];
 let currentFilter = 'all';
+let currentTypeFilter = 'all';
 let selectedProduct = null;
 let currentTheme = 'dark';
+let entries = [];
+let isOnline = false;
+let sessionId = null;
+let unsubEntries = null;
+let unsubLog = null;
+let unsubOnline = null;
+
+// ===== FIREBASE HELPERS =====
+function getDb() { return window.db; }
+function getFb() { return window.fb; }
+function getRtdb() { return window.rtdb; }
+
+function waitForFirebase() {
+  return new Promise((resolve) => {
+    if (window.fbReady) { resolve(); return; }
+    window.onFirebaseReady = resolve;
+  });
+}
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
-function loadData() {
+window.addEventListener('DOMContentLoaded', async function() {
+  loadTheme();
+  updateLoginStatus('Подключение к серверу...');
+
   try {
-    const saved = localStorage.getItem('inv_entries_v2');
-    if (saved) entries = JSON.parse(saved);
-  } catch(e) { entries = []; }
+    await waitForFirebase();
+    updateLoginStatus('✅ Сервер подключен');
+    isOnline = true;
+    updateSyncStatus('online');
+
+    // Слушаем записи в реальном времени
+    listenToEntries();
+
+    // Слушаем онлайн-пользователей
+    listenToOnlineUsers();
+
+    // Слушаем журнал входов
+    listenToLoginLog();
+  } catch(e) {
+    updateLoginStatus('❌ Ошибка подключения');
+    updateSyncStatus('offline');
+    showError('Не удалось подключиться к Firebase');
+  }
+
+  document.getElementById('userName').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('userPass').focus(); }
+  });
+  document.getElementById('userPass').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); doLogin(); }
+  });
+});
+
+function updateLoginStatus(msg) {
+  document.getElementById('loginStatus').textContent = msg;
 }
 
-function saveData() {
-  try {
-    localStorage.setItem('inv_entries_v2', JSON.stringify(entries));
-  } catch(e) { console.log('save error', e); }
+function updateSyncStatus(status) {
+  const el = document.getElementById('syncStatus');
+  const txt = document.getElementById('syncText');
+  el.className = 'sync-status ' + status;
+  if (status === 'online') { txt.textContent = 'Онлайн'; el.querySelector('span').textContent = '🟢'; }
+  else if (status === 'offline') { txt.textContent = 'Офлайн'; el.querySelector('span').textContent = '🟡'; }
+  else if (status === 'syncing') { txt.textContent = 'Синхронизация...'; el.querySelector('span').textContent = '🔵'; }
 }
 
+// ===== ОНЛАЙН-СТАТУС =====
+async function setOnlineStatus() {
+  if (!sessionId || !currentUser) return;
+  const { ref, set, onDisconnect } = getFb();
+  const rtdb = getRtdb();
+  const userRef = ref(rtdb, 'online/' + sessionId);
+  await set(userRef, {
+    name: currentUser,
+    role: currentRole,
+    joinedAt: new Date().toISOString(),
+    lastActive: new Date().toISOString()
+  });
+  onDisconnect(userRef).remove();
+}
+
+async function updateLastActive() {
+  if (!sessionId || !currentUser) return;
+  const { ref, set } = getFb();
+  const rtdb = getRtdb();
+  await set(ref(rtdb, 'online/' + sessionId + '/lastActive'), new Date().toISOString());
+}
+
+function listenToOnlineUsers() {
+  const { ref, onValue } = getFb();
+  const rtdb = getRtdb();
+  unsubOnline = onValue(ref(rtdb, 'online'), (snapshot) => {
+    const data = snapshot.val() || {};
+    const users = Object.values(data);
+    document.getElementById('onlineCount').textContent = 'Онлайн: ' + users.length;
+    renderOnlineUsers(users);
+  });
+}
+
+function renderOnlineUsers(users) {
+  const list = document.getElementById('onlineUsersList');
+  if (users.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>Никого нет онлайн</p></div>';
+    return;
+  }
+  list.innerHTML = users.map(u => 
+    '<div class="online-user"><span class="dot"></span>' + 
+    (u.role === 'chef' ? '👨‍🍳 ' : '👤 ') + u.name + '</div>'
+  ).join('');
+}
+
+// ===== ЖУРНАЛ ВХОДОВ =====
+async function logLogin() {
+  const { collection, addDoc, serverTimestamp } = getFb();
+  const db = getDb();
+  try {
+    await addDoc(collection(db, 'loginLog'), {
+      name: currentUser,
+      role: currentRole,
+      time: serverTimestamp(),
+      sessionId: sessionId
+    });
+  } catch(e) { console.log('logLogin error', e); }
+}
+
+function listenToLoginLog() {
+  const { collection, query, orderBy, onSnapshot } = getFb();
+  const db = getDb();
+  const q = query(collection(db, 'loginLog'), orderBy('time', 'desc'));
+  unsubLog = onSnapshot(q, (snapshot) => {
+    const logs = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      logs.push({
+        id: doc.id,
+        name: data.name,
+        role: data.role,
+        time: data.time ? data.time.toDate().toLocaleString('ru-RU') : '—'
+      });
+    });
+    renderLoginLog(logs.slice(0, 50));
+  });
+}
+
+function renderLoginLog(logs) {
+  const list = document.getElementById('loginLogList');
+  if (logs.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Журнал пуст</p></div>';
+    return;
+  }
+  list.innerHTML = logs.map(l => 
+    '<div class="history-item">' +
+      '<div class="h-info">' +
+        '<div class="h-name">' + (l.role === 'chef' ? '👨‍🍳 ' : '👤 ') + l.name + '</div>' +
+        '<div class="h-meta">' + l.time + '</div>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+// ===== FIRESTORE: ЗАПИСИ =====
+function listenToEntries() {
+  const { collection, query, orderBy, onSnapshot } = getFb();
+  const db = getDb();
+  const q = query(collection(db, 'entries'), orderBy('timestamp', 'desc'));
+  unsubEntries = onSnapshot(q, (snapshot) => {
+    entries = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      entries.push({
+        id: doc.id,
+        name: data.name,
+        category: data.category,
+        type: data.type,
+        qty: data.qty,
+        unit: data.unit,
+        note: data.note || '',
+        user: data.user,
+        role: data.role,
+        time: data.timestamp ? data.timestamp.toDate().toLocaleString('ru-RU') : data.time || '—'
+      });
+    });
+    if (document.getElementById('tab1').classList.contains('active')) updateSummary();
+    if (document.getElementById('tab2').classList.contains('active')) updateHistory();
+    if (document.getElementById('tab4').classList.contains('active')) updateReports();
+  });
+}
+
+// ===== АВТОРИЗАЦИЯ =====
 function selectRole(role) {
   currentRole = role;
   document.getElementById('roleChef').classList.toggle('active', role === 'chef');
   document.getElementById('roleStaff').classList.toggle('active', role === 'staff');
 }
 
-function doLogin() {
+async function doLogin() {
   const name = document.getElementById('userName').value.trim();
   const pass = document.getElementById('userPass').value.trim();
   const err = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
 
   if (!name) { err.textContent = 'Введите имя'; err.style.display = 'block'; return; }
   if (!pass) { err.textContent = 'Введите пароль'; err.style.display = 'block'; return; }
@@ -931,28 +628,53 @@ function doLogin() {
 
   if (!valid) { err.textContent = 'Неверный пароль'; err.style.display = 'block'; return; }
 
-  currentUser = name;
-  document.getElementById('userNameDisplay').textContent = name;
-  document.getElementById('userRoleDisplay').textContent = currentRole === 'chef' ? 'ШЕФ' : 'ПЕРСОНАЛ';
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Вход...';
 
-  if (currentRole === 'staff') {
-    document.body.classList.add('is-staff');
-  } else {
-    document.body.classList.remove('is-staff');
+  try {
+    currentUser = name;
+    sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+    // Устанавливаем онлайн-статус
+    await setOnlineStatus();
+
+    // Логируем вход
+    await logLogin();
+
+    document.getElementById('userNameDisplay').textContent = name;
+    document.getElementById('userRoleDisplay').textContent = currentRole === 'chef' ? 'ШЕФ' : 'ПЕРСОНАЛ';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    err.style.display = 'none';
+
+    if (currentRole === 'staff') {
+      document.body.classList.add('is-staff');
+    } else {
+      document.body.classList.remove('is-staff');
+    }
+
+    // Обновляем активность каждые 30 сек
+    setInterval(updateLastActive, 30000);
+
+  } catch(e) {
+    err.textContent = 'Ошибка входа: ' + e.message;
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Войти в систему';
   }
-
-  loadData();
-  updateSummary();
-  updateHistory();
-  updateReports();
 }
 
-function doLogout() {
+async function doLogout() {
+  if (sessionId) {
+    const { ref, remove } = getFb();
+    const rtdb = getRtdb();
+    try { await remove(ref(rtdb, 'online/' + sessionId)); } catch(e) {}
+  }
+
   currentUser = '';
   currentRole = 'chef';
+  sessionId = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('userName').value = '';
@@ -986,7 +708,12 @@ function searchProducts() {
     return;
   }
 
-  const matches = PRODUCT_BASE.filter(p =>
+  let filtered = PRODUCT_BASE;
+  if (currentTypeFilter !== 'all') {
+    filtered = filtered.filter(p => p.type === currentTypeFilter);
+  }
+
+  const matches = filtered.filter(p =>
     p.name.toLowerCase().includes(query)
   ).slice(0, 15);
 
@@ -997,8 +724,9 @@ function searchProducts() {
   }
 
   results.innerHTML = matches.map(p => {
+    const idx = PRODUCT_BASE.indexOf(p);
     const typeLabel = p.type === 'ПФ' ? 'ПФ' : (p.type === 'Барашкино' ? 'БАРАШ' : 'ТОВАР');
-    return '<div class="search-item" onclick="selectProduct(' + PRODUCT_BASE.indexOf(p) + ')">' +
+    return '<div class="search-item" onclick="selectProduct(' + idx + ')">' +
       '<div>' +
         '<div class="si-name">' + p.name + '</div>' +
         '<div class="si-cat">' + p.category + ' • ' + p.unit + '</div>' +
@@ -1008,6 +736,15 @@ function searchProducts() {
   }).join('');
 
   results.style.display = 'block';
+}
+
+function selectType(type) {
+  currentTypeFilter = type;
+  document.getElementById('typeAll').classList.toggle('active', type === 'all');
+  document.getElementById('typeGoods').classList.toggle('active', type === 'Товар');
+  document.getElementById('typePF').classList.toggle('active', type === 'ПФ');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').style.display = 'none';
 }
 
 function selectProduct(index) {
@@ -1027,8 +764,35 @@ function clearSelection() {
   document.getElementById('searchResults').style.display = 'none';
 }
 
+// ===== ПРОВЕРКА ВЕСА =====
+function checkWeight() {
+  const qty = parseFloat(document.getElementById('itemQty').value);
+  const warning = document.getElementById('weightWarning');
+
+  if (!selectedProduct || isNaN(qty)) {
+    warning.classList.remove('show');
+    return;
+  }
+
+  // Простая эвристика: если вес > 100 кг или > 100 л — предупреждение
+  let weightInKg = qty;
+  const unit = document.getElementById('itemUnit').value;
+  if (unit === 'г') weightInKg = qty / 1000;
+  if (unit === 'мл') weightInKg = qty / 1000;
+
+  if (weightInKg > 100) {
+    warning.textContent = '⚠️ Внимание: введённый вес (' + qty + ' ' + unit + ') выглядит необычно большим. Проверьте данные.';
+    warning.classList.add('show');
+  } else if (weightInKg > 0 && weightInKg < 0.001) {
+    warning.textContent = '⚠️ Внимание: введённый вес очень мал. Проверьте единицу измерения.';
+    warning.classList.add('show');
+  } else {
+    warning.classList.remove('show');
+  }
+}
+
 // ===== ВНЕСЕНИЕ =====
-function addItem() {
+async function addItem() {
   if (!selectedProduct) { alert('Сначала выберите позицию из списка'); return; }
 
   const qty = parseFloat(document.getElementById('itemQty').value);
@@ -1037,27 +801,41 @@ function addItem() {
 
   if (isNaN(qty) || qty <= 0) { alert('Введите корректное количество'); return; }
 
-  const entry = {
-    id: Date.now(),
-    name: selectedProduct.name,
-    category: selectedProduct.category,
-    type: selectedProduct.type,
-    qty: qty,
-    unit: unit,
-    note: note,
-    user: currentUser,
-    role: currentRole,
-    time: new Date().toLocaleString('ru-RU')
-  };
+  const btn = document.getElementById('addBtn');
+  btn.disabled = true;
+  btn.textContent = 'Сохранение...';
+  updateSyncStatus('syncing');
 
-  entries.push(entry);
-  saveData();
+  try {
+    const { collection, addDoc, serverTimestamp } = getFb();
+    const db = getDb();
 
-  document.getElementById('itemQty').value = '';
-  document.getElementById('itemNote').value = '';
-  clearSelection();
+    await addDoc(collection(db, 'entries'), {
+      name: selectedProduct.name,
+      category: selectedProduct.category,
+      type: selectedProduct.type,
+      qty: qty,
+      unit: unit,
+      note: note,
+      user: currentUser,
+      role: currentRole,
+      timestamp: serverTimestamp(),
+      time: new Date().toLocaleString('ru-RU')
+    });
 
-  showToast('✅ ' + entry.name + ' — ' + qty + ' ' + unit);
+    document.getElementById('itemQty').value = '';
+    document.getElementById('itemNote').value = '';
+    document.getElementById('weightWarning').classList.remove('show');
+    clearSelection();
+    showToast('✅ ' + selectedProduct.name + ' — ' + qty + ' ' + unit);
+    updateSyncStatus('online');
+  } catch(e) {
+    showError('Ошибка сохранения: ' + e.message);
+    updateSyncStatus('offline');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✅ Добавить в инвентаризацию';
+  }
 }
 
 // ===== ТАБЫ =====
@@ -1066,7 +844,7 @@ function switchTab(n) {
   document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n));
   if (n === 1) updateSummary();
   if (n === 2) updateHistory();
-  if (n === 3) updateReports();
+  if (n === 4) updateReports();
 }
 
 function showToast(msg) {
@@ -1074,6 +852,13 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function showError(msg) {
+  const t = document.getElementById('errorToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ===== НОРМАЛИЗАЦИЯ =====
@@ -1085,7 +870,7 @@ function normalizeUnit(qty, unit) {
 
 function formatUnit(total, originalUnit) {
   if (originalUnit === 'кг' || originalUnit === 'л') {
-    if (total >= 1000) return (total/1000).toFixed(3).replace(/\.?0+$/,'') + (originalUnit === 'кг' ? ' кг' : ' л');
+    if (total >= 1000) return (total/1000).toFixed(3).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1') + (originalUnit === 'кг' ? ' кг' : ' л');
     return total + (originalUnit === 'кг' ? ' г' : ' мл');
   }
   return total + ' ' + originalUnit;
@@ -1109,12 +894,11 @@ function filterCategory(cat) {
   updateSummary();
 }
 
-// ===== ИТОГИ (ВСЕ 371 ПОЗИЦИЯ) =====
+// ===== ИТОГИ =====
 function updateSummary() {
   const list = document.getElementById('summaryList');
   const canDelete = currentRole === 'chef';
 
-  // Считаем внесённые данные
   const entryGroups = {};
   entries.forEach(e => {
     const key = e.name + '|' + e.category + '|' + e.unit;
@@ -1123,10 +907,7 @@ function updateSummary() {
     entryGroups[key].entries.push(e);
   });
 
-  // Формируем полный список из базы
   let allItems = [];
-
-  // Сначала добавляем все товары из базы
   PRODUCT_BASE.forEach(product => {
     const key = product.name + '|' + product.category + '|' + product.unit;
     const hasData = entryGroups[key];
@@ -1142,29 +923,25 @@ function updateSummary() {
     });
   });
 
-  // Фильтрация
   if (currentFilter !== 'all') {
     allItems = allItems.filter(i => i.category === currentFilter);
   }
 
-  // Сортировка: сначала с данными, потом без, внутри по категории
   const catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Бакалея жидкая','Консервы','Заморозка','Напитки','Прочее'];
   allItems.sort((a,b) => {
-    if (a.hasData !== b.hasData) return b.hasData - a.hasData; // Сначала с данными
+    if (a.hasData !== b.hasData) return b.hasData - a.hasData;
     const ca = catOrder.indexOf(a.category);
     const cb = catOrder.indexOf(b.category);
     if (ca !== cb) return ca - cb;
     return a.name.localeCompare(b.name);
   });
 
-  // Статистика
   const doneCount = allItems.filter(i => i.hasData).length;
   const missingCount = allItems.filter(i => !i.hasData).length;
   document.getElementById('statTotalItems').textContent = allItems.length;
   document.getElementById('statDoneItems').textContent = doneCount;
   document.getElementById('statMissingItems').textContent = missingCount;
 
-  // Рендер
   list.innerHTML = allItems.map(item => {
     const totalStr = item.hasData ? formatUnit(item.total, item.unit) : '—';
     const cardClass = item.hasData ? 'has-data' : 'no-data';
@@ -1179,7 +956,7 @@ function updateSummary() {
         '<div class="entry-row">' +
           '<span class="entry-user">' + e.user + ' • ' + e.time.split(',')[0] + '</span>' +
           '<span class="entry-qty">+' + e.qty + ' ' + e.unit + '</span>' +
-          (canDelete ? '<span class="entry-del" onclick="deleteEntry(' + e.id + ')">🗑</span>' : '') +
+          (canDelete ? '<span class="entry-del" onclick="deleteEntry(\'' + e.id + '\')">🗑</span>' : '') +
         '</div>'
       ).join('') +
       '</div>' : '';
@@ -1202,7 +979,12 @@ function updateSummary() {
 // ===== ИСТОРИЯ =====
 function updateHistory() {
   const list = document.getElementById('historyList');
-  const sorted = [...entries].sort((a,b) => b.id - a.id);
+  const sorted = [...entries].sort((a,b) => {
+    // Сортировка по времени (новые сверху)
+    const ta = a.time ? new Date(a.time.split(',')[0].split('.').reverse().join('-') + 'T' + (a.time.split(',')[1] || '00:00').trim()) : new Date(0);
+    const tb = b.time ? new Date(b.time.split(',')[0].split('.').reverse().join('-') + 'T' + (b.time.split(',')[1] || '00:00').trim()) : new Date(0);
+    return tb - ta;
+  });
   const canDelete = currentRole === 'chef';
 
   if (sorted.length === 0) {
@@ -1217,7 +999,7 @@ function updateHistory() {
         '<div class="h-meta">' + e.user + ' • ' + e.time + (e.note ? ' • ' + e.note : '') + '</div>' +
       '</div>' +
       '<div class="h-qty">+' + e.qty + ' ' + e.unit + '</div>' +
-      (canDelete ? '<button class="h-del" onclick="deleteEntry(' + e.id + ')" type="button">×</button>' : '') +
+      (canDelete ? '<button class="h-del" onclick="deleteEntry(\'' + e.id + '\')" type="button">×</button>' : '') +
     '</div>';
   }).join('');
 }
@@ -1271,14 +1053,21 @@ function updateReports() {
 }
 
 // ===== УДАЛЕНИЕ =====
-function deleteEntry(id) {
+async function deleteEntry(id) {
   if (currentRole !== 'chef') { alert('Только шеф может удалять записи'); return; }
   if (!confirm('Удалить эту запись?')) return;
-  entries = entries.filter(e => e.id !== id);
-  saveData();
-  updateSummary();
-  updateHistory();
-  updateReports();
+
+  updateSyncStatus('syncing');
+  try {
+    const { deleteDoc, doc } = getFb();
+    const db = getDb();
+    await deleteDoc(doc(db, 'entries', id));
+    showToast('🗑️ Запись удалена');
+    updateSyncStatus('online');
+  } catch(e) {
+    showError('Ошибка удаления: ' + e.message);
+    updateSyncStatus('offline');
+  }
 }
 
 // ===== ОЧИСТКА =====
@@ -1288,24 +1077,39 @@ function showClearModal() {
 function hideClearModal() {
   document.getElementById('clearModal').classList.remove('show');
 }
-function clearAllData() {
+async function clearAllData() {
   if (currentRole !== 'chef') { alert('Только шеф может очищать данные'); return; }
-  entries = [];
-  saveData();
-  hideClearModal();
-  updateSummary();
-  updateHistory();
-  updateReports();
-  showToast('🗑️ Все данные очищены');
+
+  updateSyncStatus('syncing');
+  try {
+    const { getDocs, collection, deleteDoc, doc, writeBatch } = getFb();
+    const db = getDb();
+
+    // Удаляем все записи пакетно (макс 500 за раз)
+    const snapshot = await getDocs(collection(db, 'entries'));
+    const batch = writeBatch(db);
+    let count = 0;
+    snapshot.forEach(d => {
+      batch.delete(doc(db, 'entries', d.id));
+      count++;
+      if (count >= 400) return; // ограничение batch
+    });
+    await batch.commit();
+
+    hideClearModal();
+    showToast('🗑️ Данные очищены (' + count + ' записей)');
+    updateSyncStatus('online');
+  } catch(e) {
+    showError('Ошибка очистки: ' + e.message);
+    updateSyncStatus('offline');
+  }
 }
 
 // ===== ЭКСПОРТ =====
 function exportToCSV() {
-  // Формируем полный отчёт: все 371 позиция
   let csv = '\uFEFFНазвание;Категория;Тип;Ед.изм.;Итого;Статус;Записи;Пользователи\n';
 
   PRODUCT_BASE.forEach(product => {
-    const key = product.name + '|' + product.category + '|' + product.unit;
     const productEntries = entries.filter(e => e.name === product.name && e.category === product.category);
     const total = productEntries.reduce((sum, e) => sum + normalizeUnit(e.qty, e.unit), 0);
     const totalStr = total > 0 ? formatUnit(total, product.unit) : '0';
@@ -1345,21 +1149,38 @@ function exportToJSON() {
   showToast('💾 Резервная копия сохранена');
 }
 
-function importFromFile(input) {
+async function importFromFile(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     try {
       const data = JSON.parse(e.target.result);
       if (data.entries && Array.isArray(data.entries)) {
-        if (confirm('Загрузить ' + data.entries.length + ' записей? Текущие данные будут заменены.')) {
-          entries = data.entries;
-          saveData();
-          updateSummary();
-          updateHistory();
-          updateReports();
-          showToast('✅ Данные загружены');
+        if (confirm('Загрузить ' + data.entries.length + ' записей в облако?')) {
+          updateSyncStatus('syncing');
+          const { collection, addDoc, serverTimestamp } = getFb();
+          const db = getDb();
+          let added = 0;
+          for (const entry of data.entries) {
+            try {
+              await addDoc(collection(db, 'entries'), {
+                name: entry.name,
+                category: entry.category,
+                type: entry.type,
+                qty: entry.qty,
+                unit: entry.unit,
+                note: entry.note || '',
+                user: entry.user,
+                role: entry.role,
+                timestamp: serverTimestamp(),
+                time: entry.time || new Date().toLocaleString('ru-RU')
+              });
+              added++;
+            } catch(err) { console.log('skip entry', err); }
+          }
+          showToast('✅ Загружено ' + added + ' записей в облако');
+          updateSyncStatus('online');
         }
       } else {
         alert('Неверный формат файла');
@@ -1371,19 +1192,6 @@ function importFromFile(input) {
   };
   reader.readAsText(file);
 }
-
-// ===== ENTER =====
-window.addEventListener('DOMContentLoaded', function() {
-  loadData();
-  loadTheme();
-
-  document.getElementById('userName').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('userPass').focus(); }
-  });
-  document.getElementById('userPass').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); doLogin(); }
-  });
-});
 </script>
 </body>
 </html>
