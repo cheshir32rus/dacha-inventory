@@ -9,15 +9,15 @@
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, writeBatch, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getDatabase, ref, set, onDisconnect, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBFyCoMBSta6AYE68IH1ukGEgLSJRki0G4",
-    authDomain: "inv-dacha-2026.firebaseapp.com",
-    projectId: "inv-dacha-2026",
-    storageBucket: "inv-dacha-2026.firebasestorage.app",
-    messagingSenderId: "933996279677",
-    appId: "1:933996279677:web:00d763e6a3ee36e133be14"
-    databaseURL: "https://inv-dacha-2026-default-rtdb.europe-west1.firebasedatabase.app",
-  };
+ const firebaseConfig = {
+  apiKey: "AIzaSyBFyCoMBSta6AYE68IH1ukGEglSJRki0G4",
+  authDomain: "inv-dacha-2026.firebaseapp.com",
+  projectId: "inv-dacha-2026",
+  storageBucket: "inv-dacha-2026.firebasestorage.app",
+  messagingSenderId: "933996279677",
+  appId: "1:933996279677:web:00d763e6a3ee36e133be14",
+  databaseURL: "https://inv-dacha-2026-default-rtdb.europe-west1.firebasedatabase.app"
+};
 
   const app = initializeApp(firebaseConfig);
   window.db = getFirestore(app);
