@@ -8,21 +8,23 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, writeBatch, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getDatabase, ref, set, onDisconnect, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
- const firebaseConfig = {
-  apiKey: "AIzaSyBFyCoMBSta6AYE68IH1ukGEglSJRki0G4",
-  authDomain: "inv-dacha-2026.firebaseapp.com",
-  projectId: "inv-dacha-2026",
-  storageBucket: "inv-dacha-2026.firebasestorage.app",
-  messagingSenderId: "933996279677",
-  appId: "1:933996279677:web:00d763e6a3ee36e133be14",
-  databaseURL: "https://inv-dacha-2026-default-rtdb.europe-west1.firebasedatabase.app",
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFyCoMBSta6AYE68IH1ukGEgLSJRki0G4",
+    authDomain: "inv-dacha-2026.firebaseapp.com",
+    projectId: "inv-dacha-2026",
+    storageBucket: "inv-dacha-2026.firebasestorage.app",
+    messagingSenderId: "933996279677",
+    appId: "1:933996279677:web:00d763e6a3ee36e133be14",
+    databaseURL: "https://inv-dacha-2026-default-rtdb.europe-west1.firebasedatabase.app"
+  };
 
   const app = initializeApp(firebaseConfig);
   window.db = getFirestore(app);
   window.rtdb = getDatabase(app);
-  window.fb = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, writeBatch, setDoc, getDoc, where, ref, set, onDisconnect, onValue, remove };
+  window.fb = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, writeBatch, setDoc, getDoc, where, ref, set, onDisconnect, onValue, remove, getAuth };
+  window.auth = getAuth(app);
   window.fbReady = true;
   if (window.onFirebaseReady) window.onFirebaseReady();
 </script>
@@ -200,6 +202,7 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -427,7 +430,6 @@ let unsubOnline = null;
 
 // ===== FIREBASE HELPERS =====
 function getDb() { return window.db; }
-function getFb() { return window.fb; }
 function getRtdb() { return window.rtdb; }
 
 function waitForFirebase() {
@@ -486,7 +488,7 @@ function updateSyncStatus(status) {
 // ===== ОНЛАЙН-СТАТУС =====
 async function setOnlineStatus() {
   if (!sessionId || !currentUser) return;
-  const { ref, set, onDisconnect } = getFb();
+  const { ref, set, onDisconnect } = window.fb;
   const rtdb = getRtdb();
   const userRef = ref(rtdb, 'online/' + sessionId);
   await set(userRef, {
@@ -500,13 +502,13 @@ async function setOnlineStatus() {
 
 async function updateLastActive() {
   if (!sessionId || !currentUser) return;
-  const { ref, set } = getFb();
+  const { ref, set } = window.fb;
   const rtdb = getRtdb();
   await set(ref(rtdb, 'online/' + sessionId + '/lastActive'), new Date().toISOString());
 }
 
 function listenToOnlineUsers() {
-  const { ref, onValue } = getFb();
+  const { ref, onValue } = window.fb;
   const rtdb = getRtdb();
   unsubOnline = onValue(ref(rtdb, 'online'), (snapshot) => {
     const data = snapshot.val() || {};
@@ -530,7 +532,7 @@ function renderOnlineUsers(users) {
 
 // ===== ЖУРНАЛ ВХОДОВ =====
 async function logLogin() {
-  const { collection, addDoc, serverTimestamp } = getFb();
+  const { collection, addDoc, serverTimestamp } = window.fb;
   const db = getDb();
   try {
     await addDoc(collection(db, 'loginLog'), {
@@ -543,7 +545,7 @@ async function logLogin() {
 }
 
 function listenToLoginLog() {
-  const { collection, query, orderBy, onSnapshot } = getFb();
+  const { collection, query, orderBy, onSnapshot } = window.fb;
   const db = getDb();
   const q = query(collection(db, 'loginLog'), orderBy('time', 'desc'));
   unsubLog = onSnapshot(q, (snapshot) => {
@@ -579,7 +581,7 @@ function renderLoginLog(logs) {
 
 // ===== FIRESTORE: ЗАПИСИ =====
 function listenToEntries() {
-  const { collection, query, orderBy, onSnapshot } = getFb();
+  const { collection, query, orderBy, onSnapshot } = window.fb;
   const db = getDb();
   const q = query(collection(db, 'entries'), orderBy('timestamp', 'desc'));
   unsubEntries = onSnapshot(q, (snapshot) => {
@@ -668,7 +670,7 @@ async function doLogin() {
 
 async function doLogout() {
   if (sessionId) {
-    const { ref, remove } = getFb();
+    const { ref, remove } = window.fb;
     const rtdb = getRtdb();
     try { await remove(ref(rtdb, 'online/' + sessionId)); } catch(e) {}
   }
@@ -808,7 +810,7 @@ async function addItem() {
   updateSyncStatus('syncing');
 
   try {
-    const { collection, addDoc, serverTimestamp } = getFb();
+    const { collection, addDoc, serverTimestamp } = window.fb;
     const db = getDb();
 
     await addDoc(collection(db, 'entries'), {
@@ -1060,7 +1062,7 @@ async function deleteEntry(id) {
 
   updateSyncStatus('syncing');
   try {
-    const { deleteDoc, doc } = getFb();
+    const { deleteDoc, doc } = window.fb;
     const db = getDb();
     await deleteDoc(doc(db, 'entries', id));
     showToast('🗑️ Запись удалена');
@@ -1083,7 +1085,7 @@ async function clearAllData() {
 
   updateSyncStatus('syncing');
   try {
-    const { getDocs, collection, deleteDoc, doc, writeBatch } = getFb();
+    const { getDocs, collection, deleteDoc, doc, writeBatch } = window.fb;
     const db = getDb();
 
     // Удаляем все записи пакетно (макс 500 за раз)
@@ -1160,7 +1162,7 @@ async function importFromFile(input) {
       if (data.entries && Array.isArray(data.entries)) {
         if (confirm('Загрузить ' + data.entries.length + ' записей в облако?')) {
           updateSyncStatus('syncing');
-          const { collection, addDoc, serverTimestamp } = getFb();
+          const { collection, addDoc, serverTimestamp } = window.fb;
           const db = getDb();
           let added = 0;
           for (const entry of data.entries) {
