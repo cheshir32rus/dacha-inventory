@@ -46,8 +46,6 @@
     --shadow: rgba(0,0,0,0.08);
   }
 
-  
-
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
@@ -449,7 +447,6 @@
     border-color: var(--accent);
   }
 
-  /* Стили для итогов с нулями */
   .summary-card {
     background: var(--bg-card);
     border-radius: 16px;
@@ -591,6 +588,56 @@
     appearance: none;
   }
 
+  /* Стили для кнопок в истории и итогах */
+  .history-item .h-actions { display: flex; gap: 6px; margin-left: 10px; }
+  .history-item .h-btn {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.2s;
+  }
+  .history-item .h-btn.edit { color: var(--accent); }
+  .history-item .h-btn.del { color: var(--danger); }
+  .history-item .h-btn.req {
+    width: auto;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .entry-actions { display: flex; gap: 4px; margin-left: 8px; }
+  .entry-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.2s;
+  }
+  .entry-btn.edit { color: var(--accent); }
+  .entry-btn.del { color: var(--danger); }
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -718,6 +765,70 @@
   .is-staff .staff-only { display: block; }
   .is-staff .chef-only { display: none !important; }
 
+
+  .pending-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px var(--shadow);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .pending-card .p-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .pending-card .p-user {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .pending-card .p-role {
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(233,69,96,0.1);
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .pending-card .p-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .pending-card .p-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .pending-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .pending-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .btn-approve {
+    background: rgba(46,204,113,0.15);
+    color: #2ecc71;
+  }
+  .btn-reject {
+    background: rgba(231,76,60,0.15);
+    color: #e74c3c;
+  }
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -728,7 +839,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
   import { getDatabase, ref, set, push, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-  // Firebase конфигурация — inv-dacha-2026
   const firebaseConfig = {
     apiKey: "AIzaSyBFyCoMBSta6AYE68IH1ukGEgLSJRki0G4",
     authDomain: "inv-dacha-2026.firebaseapp.com",
@@ -742,7 +852,6 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Экспортируем для использования в глобальном скрипте
   window.firebaseDB = db;
   window.firebaseRef = ref;
   window.firebaseSet = set;
@@ -785,6 +894,7 @@
         <span id="userNameDisplay">Имя</span><br>
         <span class="role-badge" id="userRoleDisplay">ШЕФ</span>
       </div>
+      <span id="connStatus" style="font-size:10px;color:var(--text-muted);margin-right:5px;">🟢</span>
       <div id="onlineIndicator" style="display:flex;align-items:center;gap:4px;margin-right:5px;">
         <span style="width:8px;height:8px;border-radius:50%;background:#2ecc71;display:inline-block;" id="onlineDot"></span>
         <span style="font-size:10px;color:var(--text-muted);" id="onlineCount">1 онлайн</span>
@@ -803,7 +913,7 @@
     <div class="tab" onclick="switchTab(5)">⚙️ Настройки</div>
   </div>
 
-  </div><div class="tab-content active" id="tab0">
+  <div class="tab-content active" id="tab0">
     <div class="card">
       <h3>🔍 Выбрать позицию</h3>
       <div class="search-box">
@@ -816,7 +926,10 @@
             <div class="si-name" id="selName"></div>
             <div class="si-cat" id="selCat"></div>
           </div>
-          <div class="si-change" onclick="clearSelection()">✕ Сменить</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div class="si-change" id="editProdBtn" onclick="openProductEditor()" style="display:none;">✏️</div>
+            <div class="si-change" onclick="clearSelection()">✕ Сменить</div>
+          </div>
         </div>
       </div>
       <div class="qty-row">
@@ -847,6 +960,55 @@
         ℹ️ У вас доступ только к внесению данных.<br>Итоги и отчёты доступны шефу.
       </p>
     </div>
+    <!-- Карточка добавления новой позиции -->
+    <div class="card" id="addProductCard" style="display:none;">
+      <h3>➕ Новая позиция</h3>
+      <div class="form-row">
+        <label>Название</label>
+        <input type="text" id="newProdName" placeholder="Название продукта..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="qty-row">
+        <div class="form-row">
+          <label>Категория</label>
+          <select id="newProdCategory">
+            <option value="Мясо">Мясо</option>
+            <option value="Рыба">Рыба</option>
+            <option value="Овощи">Овощи</option>
+            <option value="Молочка">Молочка</option>
+            <option value="Бакалея">Бакалея</option>
+            <option value="Соусы/Заправки">Соусы/Заправки</option>
+            <option value="Бакалея жидкая">Бакалея жидкая</option>
+            <option value="Консервы">Консервы</option>
+            <option value="Фрукты/Ягоды">Фрукты/Ягоды</option>
+            <option value="Хлеб/Выпечка">Хлеб/Выпечка</option>
+            <option value="Кондитерка">Кондитерка</option>
+            <option value="Заморозка">Заморозка</option>
+            <option value="Напитки">Напитки</option>
+            <option value="Прочее">Прочее</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Тип</label>
+          <select id="newProdType">
+            <option value="Товар">Товар</option>
+            <option value="ПФ">ПФ</option>
+            <option value="Барашкино">Барашкино</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Ед.изм.</label>
+          <select id="newProdUnit">
+            <option value="кг">кг</option>
+            <option value="л">л</option>
+            <option value="шт">шт</option>
+            <option value="порц">порц</option>
+            <option value="г">г</option>
+            <option value="мл">мл</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addNewProduct()" type="button">✅ Добавить в базу</button>
+    </div>
   </div>
 
   <div class="tab-content" id="tab1">
@@ -854,6 +1016,9 @@
       <div class="stat-box"><div class="stat-num" id="statTotalItems">0</div><div class="stat-label">Всего позиций</div></div>
       <div class="stat-box"><div class="stat-num" id="statDoneItems">0</div><div class="stat-label">Считано</div></div>
       <div class="stat-box"><div class="stat-num" id="statMissingItems">0</div><div class="stat-label">Пропущено</div></div>
+    </div>
+        <div class="search-box" style="margin-bottom:14px;">
+      <input type="text" id="summarySearchInput" placeholder="Поиск по названию в итогах..." autocomplete="off" oninput="updateSummary()">
     </div>
     <div class="filter-bar" id="filterBar">
       <div class="filter-chip active" onclick="filterSummaryCategory('all')">Все</div>
@@ -876,6 +1041,9 @@
   </div>
 
   <div class="tab-content" id="tab2">
+    <div class="search-box">
+      <input type="text" id="historySearchInput" placeholder="Поиск по названию, повару или категории..." autocomplete="off" oninput="searchHistory()">
+    </div>
     <div id="historyList"></div>
   </div>
 
@@ -921,7 +1089,7 @@
       <input type="file" id="importFile" accept=".json" style="margin-bottom:10px;width:100%;font-size:14px;padding:10px;border:2px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text-primary);" onchange="importFromFile(this)">
       <p style="font-size:12px;color:var(--text-muted);">Загрузите ранее сохранённый .json файл</p>
     </div>
-    <div class="card">
+    <div class="card" id="clearCard">
       <h3>🗑️ Очистка</h3>
       <button class="btn-secondary" onclick="showClearModal()" type="button" style="border-color:var(--danger);color:var(--danger);">Очистить всю инвентаризацию</button>
     </div>
@@ -939,8 +1107,30 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h3>✏️ Изменить количество</h3>
+    <p id="editModalText">Новое количество:</p>
+    <input type="number" id="editNewQty" placeholder="0" step="0.001" min="0" inputmode="decimal" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-size:15px;background:var(--bg-input);color:var(--text-primary);margin-bottom:20px;">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()" type="button">Отмена</button>
+      <button class="btn-confirm" onclick="confirmEditRequest()" type="button" style="background:var(--accent);color:#fff;">Отправить запрос</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно просмотра записей пользователя -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-box" style="max-width: 500px; text-align: left;">
+    <h3 id="userModalTitle">Записи пользователя</h3>
+    <div id="userModalContent" style="max-height: 400px; overflow-y: auto; margin-top: 12px;"></div>
+    <div class="modal-btns" style="margin-top: 16px;">
+      <button class="btn-cancel" onclick="closeUserModal()" type="button" style="width: 100%;">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ===== КОНФИГ ПОЛЬЗОВАТЕЛЕЙ =====
 const USER_CONFIG = [
   { name: 'Дима', role: 'chef', password: 'chef-dacha-2026', label: 'Шеф-повар' },
   { name: 'Надежда', role: 'sous', password: 'sous-dacha-2026', label: 'Су-шеф' },
@@ -960,15 +1150,13 @@ const KEY_PENDING = 'inv_pending_v3';
 const KEY_THEME = 'inv_theme_v3';
 
 function loadData() {
-  // Сначала загружаем из localStorage (fallback)
   try {
     const e = localStorage.getItem(KEY_ENTRIES);
     if (e) entries = JSON.parse(e);
     const p = localStorage.getItem(KEY_PENDING);
     if (p) pending = JSON.parse(p);
   } catch(e) { entries = []; pending = []; }
-
-  // Затем подключаемся к Firebase для онлайн-синхронизации
+  loadCustomProducts();
   if (window.firebaseDB) {
     syncFromFirebase();
   }
@@ -978,15 +1166,36 @@ function syncFromFirebase() {
   const db = window.firebaseDB;
   const ref = window.firebaseRef;
   const onValue = window.firebaseOnValue;
+  const set = window.firebaseSet;
+  const get = window.firebaseGet;
 
-  // Слушаем записи
+  // Обновить индикатор соединения
+  function updateConnStatus(connected) {
+    var el = document.getElementById('connStatus');
+    if (el) el.textContent = connected ? '🟢' : '🔴';
+  }
+  updateConnStatus(true);
+
+  // Загрузка продуктов из Firebase
+  const productsRef = ref(db, 'inventory/products');
+  get(productsRef).then(function(snapshot) {
+    var data = snapshot.val();
+    if (data && Array.isArray(data)) {
+      PRODUCT_BASE = data;
+      localStorage.setItem('inv_products_v4', JSON.stringify(PRODUCT_BASE));
+      updateProductCount();
+      showToast('Продукты синхронизированы');
+    }
+  }).catch(function() {
+    updateConnStatus(false);
+  });
+
   const entriesRef = ref(db, 'inventory/entries');
   onValue(entriesRef, function(snapshot) {
     const data = snapshot.val();
     if (data) {
       entries = Object.values(data);
-      saveEntriesLocal(); // Сохраняем в localStorage как backup
-      // Обновляем UI если на нужной вкладке
+      saveEntriesLocal();
       const activeTab = document.querySelector('.tab.active');
       if (activeTab) {
         const idx = Array.from(document.querySelectorAll('.tab')).indexOf(activeTab);
@@ -995,9 +1204,11 @@ function syncFromFirebase() {
         if (idx === 3) updateReports();
       }
     }
+    updateConnStatus(true);
+  }, function() {
+    updateConnStatus(false);
   });
 
-  // Слушаем запросы
   const pendingRef = ref(db, 'inventory/pending');
   onValue(pendingRef, function(snapshot) {
     const data = snapshot.val();
@@ -1013,16 +1224,13 @@ function syncFromFirebase() {
     }
   });
 
-  // Слушаем присутствие
   const presenceRef = ref(db, 'presence/' + currentUser.name);
-  const set = window.firebaseSet;
   set(presenceRef, {
     online: true,
     role: currentUser.role,
     lastSeen: new Date().toISOString()
   });
 
-  // Удаляем при выходе
   window.addEventListener('beforeunload', function() {
     set(presenceRef, null);
   });
@@ -1040,82 +1248,57 @@ function saveEntryToFirebase(entry) {
   if (!window.firebaseDB) return;
   const db = window.firebaseDB;
   const ref = window.firebaseRef;
-  const push = window.firebasePush;
   const set = window.firebaseSet;
-
-  const newRef = push(ref(db, 'inventory/entries'));
-  set(newRef, entry);
+  // Перезаписываем весь массив для защиты от дублей
+  set(ref(db, 'inventory/entries'), entries);
 }
 
 function removeEntryFromFirebase(entryId) {
   if (!window.firebaseDB) return;
   const db = window.firebaseDB;
   const ref = window.firebaseRef;
-  const remove = window.firebaseRemove;
-
-  // Находим ключ по id
-  const entriesRef = ref(db, 'inventory/entries');
-  window.firebaseGet(entriesRef).then(function(snapshot) {
-    const data = snapshot.val();
-    if (data) {
-      for (var key in data) {
-        if (data[key].id === entryId) {
-          remove(ref(db, 'inventory/entries/' + key));
-          break;
-        }
-      }
-    }
-  });
+  const set = window.firebaseSet;
+  // Перезаписываем весь массив без удалённой записи
+  set(ref(db, 'inventory/entries'), entries);
 }
 
 function savePendingToFirebase(pendingItem) {
   if (!window.firebaseDB) return;
   const db = window.firebaseDB;
   const ref = window.firebaseRef;
-  const push = window.firebasePush;
   const set = window.firebaseSet;
-
-  const newRef = push(ref(db, 'inventory/pending'));
-  set(newRef, pendingItem);
+  // Перезаписываем весь массив
+  set(ref(db, 'inventory/pending'), pending);
 }
 
 function updatePendingInFirebase(pendingId, status) {
   if (!window.firebaseDB) return;
   const db = window.firebaseDB;
   const ref = window.firebaseRef;
-  const get = window.firebaseGet;
-  const update = window.firebaseUpdate;
-
-  const pendingRef = ref(db, 'inventory/pending');
-  get(pendingRef).then(function(snapshot) {
-    const data = snapshot.val();
-    if (data) {
-      for (var key in data) {
-        if (data[key].id === pendingId) {
-          update(ref(db, 'inventory/pending/' + key), { status: status });
-          break;
-        }
-      }
-    }
-  });
+  const set = window.firebaseSet;
+  // Перезаписываем весь массив
+  set(ref(db, 'inventory/pending'), pending);
 }
+
 function saveEntries() { 
   saveEntriesLocal();
-  // Синхронизируем последнюю запись с Firebase
-  if (entries.length > 0 && window.firebaseDB) {
-    saveEntryToFirebase(entries[entries.length - 1]);
+  if (window.firebaseDB) {
+    saveEntryToFirebase();
   }
 }
+
 function savePending() { 
   savePendingLocal();
-  if (pending.length > 0 && window.firebaseDB) {
-    savePendingToFirebase(pending[pending.length - 1]);
+  if (window.firebaseDB) {
+    savePendingToFirebase();
   }
 }
+
 function loadTheme() {
   const saved = localStorage.getItem(KEY_THEME);
   if (saved) { currentTheme = saved; document.documentElement.setAttribute('data-theme', currentTheme); }
 }
+
 function toggleTheme() {
   currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', currentTheme);
@@ -1135,7 +1318,6 @@ function selectRole(role) {
   document.getElementById('roleStaff').classList.toggle('active', role === 'staff');
 }
 
-
 function showAddProduct() {
   const card = document.getElementById('addProductCard');
   if (!card) return;
@@ -1147,6 +1329,81 @@ function showAddProduct() {
   }
 }
 
+let editingProductIndex = null;
+
+function openProductEditor() {
+  if (!selectedProduct) return;
+  const idx = PRODUCT_BASE.findIndex(p => p.name === selectedProduct.name && p.category === selectedProduct.category);
+  if (idx === -1) return;
+  if (currentUser.role !== 'chef' && currentUser.role !== 'accountant') {
+    showToast('Редактирование только для шефа и бухгалтера'); return;
+  }
+  editingProductIndex = idx;
+  const p = PRODUCT_BASE[idx];
+  document.getElementById('prodEditText').textContent = 'Редактирование: ' + p.name;
+  document.getElementById('editProdName').value = p.name;
+  document.getElementById('editProdCategory').value = p.category;
+  document.getElementById('editProdType').value = p.type;
+  document.getElementById('editProdUnit').value = p.unit;
+  document.getElementById('productEditModal').classList.add('show');
+}
+
+function closeProductEditModal() {
+  document.getElementById('productEditModal').classList.remove('show');
+  editingProductIndex = null;
+}
+
+function saveProductEdit() {
+  if (editingProductIndex === null) return;
+  const newName = document.getElementById('editProdName').value.trim();
+  const newCat = document.getElementById('editProdCategory').value;
+  const newType = document.getElementById('editProdType').value;
+  const newUnit = document.getElementById('editProdUnit').value;
+  if (!newName) { showToast('Введите название'); return; }
+
+  const oldName = PRODUCT_BASE[editingProductIndex].name;
+  const oldCat = PRODUCT_BASE[editingProductIndex].category;
+
+  PRODUCT_BASE[editingProductIndex] = {
+    name: newName, category: newCat, type: newType, unit: newUnit
+  };
+
+  // Обновить записи с этим продуктом
+  entries.forEach(function(e) {
+    if (e.name === oldName && e.category === oldCat) {
+      e.name = newName; e.category = newCat; e.unit = newUnit;
+    }
+  });
+
+  // Пересортировать
+  var catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Бакалея жидкая','Консервы','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Заморозка','Напитки','Прочее'];
+  var typeOrder = {'Товар': 0, 'ПФ': 1, 'Барашкино': 2};
+  PRODUCT_BASE.sort(function(a,b) {
+    var ca = catOrder.indexOf(a.category); var cb = catOrder.indexOf(b.category);
+    if (ca !== cb) return ca - cb;
+    var ta = typeOrder[a.type] || 99; var tb = typeOrder[b.type] || 99;
+    if (ta !== tb) return ta - tb;
+    return a.name.localeCompare(b.name);
+  });
+
+  localStorage.setItem('inv_products_v4', JSON.stringify(PRODUCT_BASE));
+  saveEntriesLocal();
+
+  // Синхронизация в Firebase
+  if (window.firebaseDB) {
+    const db = window.firebaseDB;
+    const ref = window.firebaseRef;
+    const set = window.firebaseSet;
+    set(ref(db, 'inventory/products'), PRODUCT_BASE);
+    set(ref(db, 'inventory/entries'), entries);
+  }
+
+  closeProductEditModal();
+  clearSelection();
+  updateSummary(); updateHistory(); updateReports();
+  showToast('Позиция обновлена');
+}
+
 function addNewProduct() {
   const name = document.getElementById('newProdName').value.trim();
   const category = document.getElementById('newProdCategory').value;
@@ -1155,14 +1412,12 @@ function addNewProduct() {
 
   if (!name) { showToast('Введите название'); return; }
 
-  // Проверка на дубль
   const exists = PRODUCT_BASE.some(p => p.name.toLowerCase() === name.toLowerCase());
   if (exists) { showToast('Такая позиция уже есть в базе'); return; }
 
   const newProduct = { name: name, category: category, unit: unit, type: type };
   PRODUCT_BASE.push(newProduct);
 
-  // Сортируем заново
   const catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Бакалея жидкая','Консервы','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Заморозка','Напитки','Прочее'];
   const typeOrder = {'Товар': 0, 'ПФ': 1, 'Барашкино': 2};
   PRODUCT_BASE.sort(function(a,b) {
@@ -1173,10 +1428,16 @@ function addNewProduct() {
     return a.name.localeCompare(b.name);
   });
 
-  // Сохраняем в localStorage
   localStorage.setItem('inv_products_v4', JSON.stringify(PRODUCT_BASE));
 
-  // Очищаем поля
+  // Синхронизация в Firebase
+  if (window.firebaseDB) {
+    const db = window.firebaseDB;
+    const ref = window.firebaseRef;
+    const set = window.firebaseSet;
+    set(ref(db, 'inventory/products'), PRODUCT_BASE);
+  }
+
   document.getElementById('newProdName').value = '';
   document.getElementById('addProductCard').style.display = 'none';
 
@@ -1188,12 +1449,10 @@ function loadCustomProducts() {
     var saved = localStorage.getItem('inv_products_v4');
     if (saved) {
       var custom = JSON.parse(saved);
-      // Добавляем только те, которых ещё нет
       custom.forEach(function(cp) {
         var exists = PRODUCT_BASE.some(function(p) { return p.name === cp.name; });
         if (!exists) PRODUCT_BASE.push(cp);
       });
-      // Пересортируем
       var catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Бакалея жидкая','Консервы','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Заморозка','Напитки','Прочее'];
       var typeOrder = {'Товар': 0, 'ПФ': 1, 'Барашкино': 2};
       PRODUCT_BASE.sort(function(a,b) {
@@ -1208,13 +1467,11 @@ function loadCustomProducts() {
 }
 
 function doLogin() {
-  // Guard от ghost click / double tap
   if (window._loggingIn) return;
   window._loggingIn = true;
   setTimeout(function() { window._loggingIn = false; }, 500);
 
   const loginScreen = document.getElementById('loginScreen');
-  // Если уже вошли (loginScreen скрыт) — игнорируем
   if (loginScreen.style.display === 'none') return;
 
   const nameInput = document.getElementById('userName').value.trim();
@@ -1243,7 +1500,6 @@ function doLogin() {
   switchTab(0);
   showToast('Добро пожаловать, ' + currentUser.name + '!');
 
-  // Запускаем онлайн-присутствие
   if (window.firebaseDB) {
     setupOnlinePresence();
   }
@@ -1256,10 +1512,9 @@ function doLogout() {
   document.getElementById('userName').value = '';
   document.getElementById('userPass').value = '';
   document.getElementById('loginError').style.display = 'none';
-  document.getElementById('passField').classList.remove('show');
+  document.getElementById('passField') && (document.getElementById('passField').classList.remove('show'));
   clearSelection();
 }
-
 
 function setupOnlinePresence() {
   const db = window.firebaseDB;
@@ -1267,7 +1522,6 @@ function setupOnlinePresence() {
   const onValue = window.firebaseOnValue;
   const set = window.firebaseSet;
 
-  // Отмечаем себя онлайн
   const myPresenceRef = ref(db, 'presence/' + currentUser.name);
   set(myPresenceRef, {
     online: true,
@@ -1275,7 +1529,6 @@ function setupOnlinePresence() {
     lastSeen: new Date().toISOString()
   });
 
-  // Слушаем всех онлайн
   const allPresenceRef = ref(db, 'presence');
   onValue(allPresenceRef, function(snapshot) {
     const data = snapshot.val();
@@ -1290,10 +1543,17 @@ function setupOnlinePresence() {
         dot.style.background = count > 1 ? '#2ecc71' : '#f39c12';
         countEl.textContent = count + ' онлайн';
       }
+      // Проверяем, есть ли шеф в сети
+      var chefOnline = false;
+      for (var k in data) {
+        if (data[k].role === 'chef' && data[k].online === true) {
+          chefOnline = true; break;
+        }
+      }
+      window._chefOnline = chefOnline;
     }
   });
 
-  // Удаляем при закрытии
   window.addEventListener('beforeunload', function() {
     set(myPresenceRef, null);
   });
@@ -1305,11 +1565,13 @@ function setupTabsForRole() {
   const staffHint = document.getElementById('staffHint');
   const addBtn = document.getElementById('addProdBtn');
   const addCard = document.getElementById('addProductCard');
+  const clearCard = document.getElementById('clearCard');
 
   tabs.forEach(function(t) { if (t) t.style.display = 'flex'; });
   if (staffHint) staffHint.style.display = 'none';
   if (addBtn) addBtn.style.display = 'none';
   if (addCard) addCard.style.display = 'none';
+  if (clearCard) clearCard.style.display = 'block';
 
   if (role === 'chef') {
     if (addBtn) addBtn.style.display = 'flex';
@@ -1318,10 +1580,10 @@ function setupTabsForRole() {
     if (tabs[4]) tabs[4].style.display = 'none';
     if (tabs[5]) tabs[5].style.display = 'none';
   } else if (role === 'accountant') {
+    // Бухгалтер: полный доступ как шеф, кроме очистки данных
     if (addBtn) addBtn.style.display = 'flex';
-    if (tabs[2]) tabs[2].style.display = 'none';
-    if (tabs[4]) tabs[4].style.display = 'none';
-    if (tabs[5]) tabs[5].style.display = 'none';
+    if (clearCard) clearCard.style.display = 'none';
+    if (staffHint) staffHint.style.display = 'none';
   } else if (role === 'cook') {
     if (tabs[1]) tabs[1].style.display = 'none';
     if (tabs[3]) tabs[3].style.display = 'none';
@@ -1368,6 +1630,11 @@ function selectProduct(index) {
   document.getElementById('selName').textContent = selectedProduct.name;
   document.getElementById('selCat').textContent = selectedProduct.category + ' &bull; ' + selectedProduct.unit;
   document.getElementById('itemUnit').value = selectedProduct.unit;
+  // Показать кнопку редактирования для шефа и бухгалтера
+  var editBtn = document.getElementById('editProdBtn');
+  if (editBtn) {
+    editBtn.style.display = (currentUser.role === 'chef' || currentUser.role === 'accountant') ? 'flex' : 'none';
+  }
 }
 function clearSelection() {
   selectedProduct = null;
@@ -1390,7 +1657,7 @@ function addItem() {
   };
   entries.push(entry); 
   saveEntriesLocal();
-  saveEntryToFirebase(entry);
+  saveEntryToFirebase();
   document.getElementById('itemQty').value = '';
   document.getElementById('itemNote').value = '';
   clearSelection();
@@ -1432,7 +1699,6 @@ function filterSummaryCategory(cat) {
   });
   updateSummary();
 }
-
 
 function updateProductCount() {
   var goods = PRODUCT_BASE.filter(function(p){ return p.type === 'Товар'; }).length;
@@ -1483,12 +1749,13 @@ function updateSummary() {
   updateProductCount();
   const list = document.getElementById('summaryList');
   if (currentUser.role === 'cook') {
-    list.innerHTML = '<div class="no-access"><div class="icon">&#128274;</div><p>Доступ к итогам только шефу, су-шефу и бухгалтеру</p></div>';
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128274;</div><p>Доступ к итогам только шефу, су-шефу и бухгалтеру</p></div>';
     document.getElementById('statTotalItems').textContent = '—';
     document.getElementById('statDoneItems').textContent = '—';
     document.getElementById('statMissingItems').textContent = '—';
     return;
   }
+  const searchQuery = (document.getElementById('summarySearchInput') && document.getElementById('summarySearchInput').value || '').trim().toLowerCase();
   const entryGroups = {};
   entries.forEach(e => {
     const key = e.name + '|' + e.category + '|' + e.unit;
@@ -1503,6 +1770,26 @@ function updateSummary() {
       total: hasData ? hasData.total : 0, entries: hasData ? hasData.entries : [], hasData: !!hasData };
   });
   if (currentSummaryFilter !== 'all') allItems = allItems.filter(i => i.category === currentSummaryFilter);
+  if (searchQuery) allItems = allItems.filter(i => i.name.toLowerCase().includes(searchQuery));
+  // Убираем дубли по имени (берём первый по порядку: Товар > ПФ > Барашкино)
+  const seen = {};
+  const deduped = [];
+  allItems.forEach(function(item) {
+    const baseName = item.name.toLowerCase().trim();
+    if (!seen[baseName]) {
+      seen[baseName] = item;
+      deduped.push(item);
+    } else {
+      // Если уже видели — суммируем записи
+      const existing = seen[baseName];
+      if (item.hasData) {
+        existing.hasData = true;
+        existing.total = (existing.total || 0) + item.total;
+        existing.entries = existing.entries.concat(item.entries);
+      }
+    }
+  });
+  allItems = deduped;
   const catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Бакалея жидкая','Консервы','Заморозка','Напитки','Прочее'];
   allItems.sort((a,b) => {
     if (a.hasData !== b.hasData) return b.hasData - a.hasData;
@@ -1521,7 +1808,7 @@ function updateSummary() {
     const statusClass = item.hasData ? 'done' : 'missing';
     const statusText = item.hasData ? '&#10003; Считано' : '&#9888; Не считано';
     const typeLabel = item.type === 'ПФ' ? 'ПФ' : (item.type === 'Барашкино' ? 'БАРАШ' : 'ТОВАР');
-    const canAct = currentUser.role === 'chef';
+    const canAct = currentUser.role === 'chef' || currentUser.role === 'sous' || currentUser.role === 'accountant';
     const entriesHtml = item.entries.length > 0 ?
       '<div class="entries-list">' + item.entries.map(e =>
         '<div class="entry-row">' +
@@ -1539,19 +1826,34 @@ function updateSummary() {
   }).join('');
 }
 
+/* ===== ПУНКТ 1: Поиск по внесённым позициям ===== */
+function searchHistory() {
+  updateHistory();
+}
+
 function updateHistory() {
   const list = document.getElementById('historyList');
+  const query = (document.getElementById('historySearchInput') && document.getElementById('historySearchInput').value || '').trim().toLowerCase();
   let visible = [...entries];
   if (currentUser.role === 'cook') visible = visible.filter(e => e.user === currentUser.name);
+  
+  if (query) {
+    visible = visible.filter(e => 
+      e.name.toLowerCase().includes(query) || 
+      e.user.toLowerCase().includes(query) ||
+      (e.category && e.category.toLowerCase().includes(query))
+    );
+  }
+  
   visible.sort((a,b) => b.id - a.id);
   if (visible.length === 0) {
     list.innerHTML = '<div class="empty-state"><div class="icon">&#128336;</div><p>История пуста</p></div>';
     return;
   }
   list.innerHTML = visible.map(e => {
-    const canDelete = currentUser.role === 'chef';
-    const canRequestEdit = currentUser.role !== 'chef';
-    const canRequestDel = currentUser.role === 'sous' || currentUser.role === 'chef';
+    const canDelete = currentUser.role === 'chef' || currentUser.role === 'sous' || currentUser.role === 'accountant';
+    const canRequestEdit = currentUser.role === 'cook';
+    const canRequestDel = false;
     let actions = '';
     if (canDelete) {
       actions = '<button class="h-btn edit" onclick="chefEditEntry(' + e.id + ')" type="button">&#9999;&#65039;</button>' +
@@ -1568,6 +1870,34 @@ function updateHistory() {
       '<div class="h-actions">' + actions + '</div>' +
     '</div>';
   }).join('');
+}
+
+/* ===== ПУНКТ 2: Клик на участника открывает его записи ===== */
+function showUserEntries(userName) {
+  const userEntries = entries.filter(e => e.user === userName).sort((a,b) => b.id - a.id);
+  const modal = document.getElementById('userModal');
+  const title = document.getElementById('userModalTitle');
+  const content = document.getElementById('userModalContent');
+  
+  title.textContent = '📋 ' + userName + ' — ' + userEntries.length + ' записей';
+  
+  if (userEntries.length === 0) {
+    content.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;"><div style="font-size:32px;margin-bottom:10px;">📭</div><p>Нет записей</p></div>';
+  } else {
+    content.innerHTML = userEntries.map(e => {
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="font-weight:700;font-size:14px;color:var(--text-primary);">' + e.name + '</div>' +
+        '<div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">' + e.qty + ' ' + e.unit + ' &bull; ' + e.category + '</div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + e.time + (e.note ? ' &bull; 📝 ' + e.note : '') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  
+  modal.classList.add('show');
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').classList.remove('show');
 }
 
 function requestEdit(entryId) {
@@ -1602,19 +1932,19 @@ function confirmEditRequest() {
 function requestDelete(entryId) {
   const entry = entries.find(e => e.id === entryId);
   if (!entry) return;
-  if (!confirm('Отправить запрос на удаление записи &laquo;' + entry.name + '&raquo; шефу?')) return;
+  if (!confirm('Отправить запрос на удаление записи «' + entry.name + '» шефу?')) return;
   pending.push({
     id: Date.now(), type: 'delete', entryId: entryId,
     requestedBy: currentUser.name, requesterRole: currentUser.role,
     timestamp: new Date().toLocaleString('ru-RU'),
-    desc: 'Удалить &laquo;' + entry.name + '&raquo; (' + entry.qty + ' ' + entry.unit + ')'
+    desc: 'Удалить «' + entry.name + '» (' + entry.qty + ' ' + entry.unit + ')'
   });
   savePending(); updateBadge();
   showToast('Запрос на удаление отправлен шефу');
 }
 
 function chefDeleteEntry(id) {
-  if (currentUser.role !== 'chef') return;
+  if (currentUser.role !== 'chef' && currentUser.role !== 'sous' && currentUser.role !== 'accountant') return;
   if (!confirm('Удалить эту запись?')) return;
   entries = entries.filter(e => e.id !== id);
   saveEntriesLocal();
@@ -1623,10 +1953,10 @@ function chefDeleteEntry(id) {
   showToast('Запись удалена');
 }
 function chefEditEntry(id) {
-  if (currentUser.role !== 'chef') return;
+  if (currentUser.role !== 'chef' && currentUser.role !== 'sous' && currentUser.role !== 'accountant') return;
   const entry = entries.find(e => e.id === id);
   if (!entry) return;
-  const newQty = prompt('Новое количество для &laquo;' + entry.name + '&raquo; (текущее: ' + entry.qty + ' ' + entry.unit + '):');
+  const newQty = prompt('Новое количество для «' + entry.name + '» (текущее: ' + entry.qty + ' ' + entry.unit + '):');
   if (newQty === null) return;
   const qty = parseFloat(newQty);
   if (isNaN(qty) || qty <= 0) { showToast('Некорректное значение'); return; }
@@ -1644,8 +1974,8 @@ function updateBadge() {
 }
 function updateRequests() {
   const list = document.getElementById('requestsList');
-  if (currentUser.role !== 'chef') {
-    list.innerHTML = '<div class="no-access"><div class="icon">&#128274;</div><p>Только для шефа</p></div>';
+  if (currentUser.role !== 'chef' && currentUser.role !== 'accountant') {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128274;</div><p>Только для шефа и бухгалтера</p></div>';
     return;
   }
   const active = pending.filter(p => p.status !== 'approved' && p.status !== 'rejected');
@@ -1668,25 +1998,49 @@ function updateRequests() {
 function approveRequest(pid) {
   const req = pending.find(p => p.id === pid);
   if (!req) return;
+  // Бухгалтер может одобрять только если шеф не в сети
+  if (currentUser.role === 'accountant' && window._chefOnline) {
+    showToast('Шеф в сети — запрос направлен ему'); return;
+  }
   if (req.type === 'delete') { entries = entries.filter(e => e.id !== req.entryId); }
   else if (req.type === 'edit') {
     const entry = entries.find(e => e.id === req.entryId);
     if (entry) { entry.qty = req.newQty; entry.unit = req.newUnit; }
   }
   req.status = 'approved';
+  req.approvedBy = currentUser.name;
+  req.approvedAt = new Date().toLocaleString('ru-RU');
   saveEntriesLocal(); savePendingLocal();
-  updatePendingInFirebase(pid, 'approved');
+  // Синхронизировать всё в Firebase
+  if (window.firebaseDB) {
+    const db = window.firebaseDB;
+    const ref = window.firebaseRef;
+    const set = window.firebaseSet;
+    set(ref(db, 'inventory/entries'), entries);
+    set(ref(db, 'inventory/pending'), pending);
+  }
   updateRequests(); updateSummary(); updateHistory(); updateReports(); updateBadge();
-  showToast('Запрос одобрен');
+  showToast('Запрос одобрен' + (currentUser.role === 'accountant' ? ' (бухгалтер)' : ''));
 }
 function rejectRequest(pid) {
   const req = pending.find(p => p.id === pid);
   if (!req) return;
+  // Бухгалтер может отклонять только если шеф не в сети
+  if (currentUser.role === 'accountant' && window._chefOnline) {
+    showToast('Шеф в сети — запрос направлен ему'); return;
+  }
   req.status = 'rejected';
+  req.rejectedBy = currentUser.name;
+  req.rejectedAt = new Date().toLocaleString('ru-RU');
   savePendingLocal();
-  updatePendingInFirebase(pid, 'rejected');
+  if (window.firebaseDB) {
+    const db = window.firebaseDB;
+    const ref = window.firebaseRef;
+    const set = window.firebaseSet;
+    set(ref(db, 'inventory/pending'), pending);
+  }
   updateRequests(); updateBadge();
-  showToast('Запрос отклонён');
+  showToast('Запрос отклонён' + (currentUser.role === 'accountant' ? ' (бухгалтер)' : ''));
 }
 
 function filterReportType(type) {
@@ -1701,10 +2055,12 @@ function filterReportType(type) {
   });
   updateReports();
 }
+
+/* ===== ПУНКТ 2 (продолжение): Клик на участника в отчётах ===== */
 function updateReports() {
   const list = document.getElementById('reportsList');
   if (currentUser.role === 'cook') {
-    list.innerHTML = '<div class="no-access"><div class="icon">&#128274;</div><p>Доступ к отчётам ограничен</p></div>';
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128274;</div><p>Доступ к отчётам ограничен</p></div>';
     document.getElementById('reportTotalUsers').textContent = '—';
     document.getElementById('reportTotalEntries').textContent = '—';
     document.getElementById('reportTotalProducts').textContent = '—';
@@ -1732,8 +2088,12 @@ function updateReports() {
   list.innerHTML = userList.map(u => {
     const topItems = Object.entries(u.items).sort((a,b) => b[1]-a[1]).slice(0,5).map(([n,c]) => n+' ('+c+')').join(', ');
     const topCats = Object.entries(u.categories).sort((a,b) => b[1]-a[1]).slice(0,3).map(([c,n]) => c+': '+n).join(' &bull; ');
+    const roleIcon = u.role==='chef'?'&#128104;&#8205;&#127859;':(u.role==='cook'?'&#128100;':'&#128221;');
     return '<div class="report-card">' +
-      '<div class="r-header"><span class="r-name">' + (u.role==='chef'?'&#128104;&#8205;&#127859;':(u.role==='cook'?'&#128100;':'&#128221;')) + ' ' + u.name + '</span><span class="r-count">' + u.count + ' записей</span></div>' +
+      '<div class="r-header">' +
+        '<span class="r-name" style="cursor:pointer;text-decoration:underline;" onclick="showUserEntries(\'' + u.name.replace(/'/g, "\\'") + '\')">' + roleIcon + ' ' + u.name + '</span>' +
+        '<span class="r-count">' + u.count + ' записей</span>' +
+      '</div>' +
       '<div class="r-items"><strong>Топ позиций:</strong> ' + topItems + '<br><strong>Категории:</strong> ' + topCats + '</div>' +
     '</div>';
   }).join('');
@@ -1783,7 +2143,14 @@ function importFromFile(input) {
       if (data.entries && Array.isArray(data.entries)) {
         if (confirm('Загрузить ' + data.entries.length + ' записей? Текущие будут заменены.')) {
           entries = data.entries || []; pending = data.pending || [];
-          saveEntries(); savePending();
+          saveEntriesLocal(); savePendingLocal();
+          if (window.firebaseDB) {
+            const db = window.firebaseDB;
+            const ref = window.firebaseRef;
+            const set = window.firebaseSet;
+            set(ref(db, 'inventory/entries'), entries);
+            set(ref(db, 'inventory/pending'), pending);
+          }
           updateSummary(); updateHistory(); updateReports(); updateBadge();
           showToast('Данные загружены');
         }
@@ -1799,7 +2166,15 @@ function hideClearModal() { document.getElementById('clearModal').classList.remo
 function clearAllData() {
   if (currentUser.role !== 'chef') { showToast('Только шеф может очищать данные'); return; }
   entries = []; pending = [];
-  saveEntries(); savePending();
+  saveEntriesLocal(); savePendingLocal();
+  // Очистить Firebase
+  if (window.firebaseDB) {
+    const db = window.firebaseDB;
+    const ref = window.firebaseRef;
+    const set = window.firebaseSet;
+    set(ref(db, 'inventory/entries'), []);
+    set(ref(db, 'inventory/pending'), []);
+  }
   hideClearModal();
   updateSummary(); updateHistory(); updateReports(); updateRequests(); updateBadge();
   showToast('Все данные очищены');
@@ -1815,7 +2190,6 @@ function showToast(msg) {
 window.addEventListener('DOMContentLoaded', function() {
   loadData();
   loadTheme();
-  loadCustomProducts();
   document.getElementById('userName').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       const known = USER_CONFIG.find(u => u.name.toLowerCase() === this.value.trim().toLowerCase());
@@ -2182,7 +2556,7 @@ const PRODUCT_BASE = [
   {"name": "Специи в ассортименте", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
   {"name": "Топпинг", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
   {"name": "Мороженое (кухня)", "category": "Заморозка", "unit": "кг", "type": "Товар"},
-  {"name": "Начинка с вишней п/ф (варенники)", "category": "Заморозка", "unit": "кг", "type": "ПФ"},
+  {"name": "Начинка с вишней п/ф (вареники)", "category": "Заморозка", "unit": "кг", "type": "ПФ"},
   {"name": "Вода газ. кухня", "category": "Напитки", "unit": "л", "type": "Товар"},
   {"name": "Вода фильтрованная бесплатная", "category": "Напитки", "unit": "л", "type": "Товар"},
   {"name": "Квас", "category": "Напитки", "unit": "л", "type": "Товар"},
@@ -2239,16 +2613,75 @@ const PRODUCT_BASE = [
   {"name": "Мясо мидий (Барашка)", "category": "Прочее", "unit": "кг", "type": "Барашкино"},
   {"name": "Шея говядины (Барашка)", "category": "Прочее", "unit": "кг", "type": "Барашкино"}
 ];
+
+// Offline-защита: синхронизация при восстановлении соединения
+window.addEventListener('online', function() {
+  if (window.firebaseDB && currentUser) {
+    const db = window.firebaseDB;
+    const ref = window.firebaseRef;
+    const set = window.firebaseSet;
+    set(ref(db, 'inventory/entries'), entries);
+    set(ref(db, 'inventory/pending'), pending);
+    set(ref(db, 'inventory/products'), PRODUCT_BASE);
+    var el = document.getElementById('connStatus');
+    if (el) el.textContent = '🟢';
+    showToast('Соединение восстановлено. Данные синхронизированы.');
+  }
+});
+window.addEventListener('offline', function() {
+  var el = document.getElementById('connStatus');
+  if (el) el.textContent = '🔴';
+  showToast('Нет соединения. Данные сохранены локально.');
+});
+
 </script>
 
-<div class="modal-overlay" id="editModal">
+<!-- Модальное окно редактирования продукта -->
+<div class="modal-overlay" id="productEditModal">
   <div class="modal-box">
-    <h3>✏️ Изменить количество</h3>
-    <p id="editModalText">Новое количество:</p>
-    <input type="number" id="editNewQty" placeholder="0" step="0.001" min="0" inputmode="decimal" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-size:15px;background:var(--bg-input);color:var(--text-primary);margin-bottom:20px;">
+    <h3>✏️ Редактировать позицию</h3>
+    <p id="prodEditText">Название:</p>
+    <input type="text" id="editProdName" placeholder="Название" autocomplete="off" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-size:15px;background:var(--bg-input);color:var(--text-primary);margin-bottom:10px;">
+    <div class="qty-row" style="margin-bottom:10px;">
+      <div class="form-row" style="flex:1;">
+        <select id="editProdCategory" style="width:100%;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+          <option value="Мясо">Мясо</option>
+          <option value="Рыба">Рыба</option>
+          <option value="Овощи">Овощи</option>
+          <option value="Молочка">Молочка</option>
+          <option value="Бакалея">Бакалея</option>
+          <option value="Соусы/Заправки">Соусы/Заправки</option>
+          <option value="Бакалея жидкая">Бакалея жидкая</option>
+          <option value="Консервы">Консервы</option>
+          <option value="Фрукты/Ягоды">Фрукты/Ягоды</option>
+          <option value="Хлеб/Выпечка">Хлеб/Выпечка</option>
+          <option value="Кондитерка">Кондитерка</option>
+          <option value="Заморозка">Заморозка</option>
+          <option value="Напитки">Напитки</option>
+          <option value="Прочее">Прочее</option>
+        </select>
+      </div>
+      <div class="form-row" style="flex:1;">
+        <select id="editProdType" style="width:100%;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+          <option value="Товар">Товар</option>
+          <option value="ПФ">ПФ</option>
+          <option value="Барашкино">Барашкино</option>
+        </select>
+      </div>
+      <div class="form-row" style="flex:1;">
+        <select id="editProdUnit" style="width:100%;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg-input);color:var(--text-primary);font-size:14px;">
+          <option value="кг">кг</option>
+          <option value="л">л</option>
+          <option value="шт">шт</option>
+          <option value="порц">порц</option>
+          <option value="г">г</option>
+          <option value="мл">мл</option>
+        </select>
+      </div>
+    </div>
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeEditModal()" type="button">Отмена</button>
-      <button class="btn-confirm" onclick="confirmEditRequest()" type="button" style="background:var(--accent);color:#fff;">Отправить запрос</button>
+      <button class="btn-cancel" onclick="closeProductEditModal()" type="button">Отмена</button>
+      <button class="btn-confirm" onclick="saveProductEdit()" type="button" style="background:var(--accent);color:#fff;">Сохранить</button>
     </div>
   </div>
 </div>
