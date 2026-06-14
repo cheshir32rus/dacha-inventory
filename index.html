@@ -12,7 +12,2319 @@
     --bg-input: #1c1c1c;<!DOCTYPE html>
 <html lang="ru">
 <head>
+<meta charset="UTF-8"><!DOCTYPE html>
+<html lang="ru">
+<head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Инвентаризация v3 — Кафе «Дача»</title>
+<style>
+  :root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #0f0f0f;
+    --bg-card: #141414;
+    --bg-input: #1c1c1c;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --accent: #800020;
+    --accent-hover: #600018;
+    --accent-light: #a00028;
+    --gold: #D4AF37;
+    --gold-light: #FFD700;
+    --gold-dim: #8a7020;
+    --border: #2a2a2a;
+    --success: #D4AF37;
+    --warning: #ff9800;
+    --danger: #b71c1c;
+    --shadow: rgba(0,0,0,0.6);
+  }
+  [data-theme="light"] {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-input: #f0f0f0;
+    --text-primary: #1a1a1a;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+    --accent: #800020;
+    --accent-hover: #600018;
+    --accent-light: #a00028;
+    --gold: #B8860B;
+    --gold-light: #D4AF37;
+    --gold-dim: #8a7020;
+    --border: #e0e0e0;
+    --success: #B8860B;
+    --warning: #e65100;
+    --danger: #c62828;
+    --shadow: rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 20px;
+    transition: background 0.3s;
+  }
+  .login-logo {
+    font-size: 48px;
+    margin-bottom: 10px;
+  }
+  .login-screen h1 {
+    color: var(--accent);
+    font-size: 26px;
+    margin-bottom: 6px;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .login-screen .subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 35px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .login-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 35px 28px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 10px 40px var(--shadow);
+    transition: all 0.3s;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 16px 18px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 16px;
+    margin-bottom: 14px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .login-box input:focus { border-color: var(--accent); background: var(--bg-secondary); }
+  .login-box input::placeholder { color: var(--text-muted); }
+  .login-box button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    letter-spacing: 0.5px;
+  }
+  .login-box button:active { background: var(--accent-hover); transform: scale(0.97); }
+  .role-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .role-btn {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .role-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(233,69,96,0.08);
+  }
+  .error-msg {
+    color: var(--danger);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    display: none;
+    min-height: 20px;
+    font-weight: 500;
+  }
+
+  .app { display: none; }
+  .app-header {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 15px var(--shadow);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .app-header h1 { font-size: 17px; color: var(--accent); font-weight: 700; }
+  .app-header .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .app-header .user-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    line-height: 1.4;
+  }
+  .app-header .user-info .role-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.2s;
+  }
+  .icon-btn:active { background: var(--bg-input); }
+
+  .tabs {
+    display: flex;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 57px;
+    z-index: 99;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: all 0.3s;
+  }
+  .tab {
+    flex: 1;
+    min-width: 70px;
+    padding: 14px 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(233,69,96,0.05);
+  }
+
+  .tab-content { display: none; padding: 16px; padding-bottom: 120px; }
+  .tab-content.active { display: block; }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px var(--shadow);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .card h3 {
+    font-size: 15px;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+  }
+  .form-row { margin-bottom: 14px; }
+  .form-row label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-row input, .form-row select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .form-row input:focus, .form-row select:focus {
+    border-color: var(--accent);
+    background: var(--bg-secondary);
+  }
+  .form-row input::placeholder { color: var(--text-muted); }
+  .qty-row { display: flex; gap: 12px; }
+  .qty-row .form-row:first-child { flex: 2; }
+  .qty-row .form-row:last-child { flex: 1; }
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    letter-spacing: 0.5px;
+  }
+  .btn-primary:active { background: var(--accent-hover); transform: scale(0.98); }
+  .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .btn-secondary:active { background: var(--bg-input); }
+
+  .search-box {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .search-box input:focus { border-color: var(--accent); }
+  .search-box::before {
+    content: "🔍";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    opacity: 0.5;
+  }
+  .search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    margin-bottom: 14px;
+  }
+  .search-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .search-item:last-child { border-bottom: none; }
+  .search-item:active { background: var(--bg-input); }
+  .search-item .si-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .search-item .si-cat { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .search-item .si-type {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .selected-item {
+    background: rgba(233,69,96,0.08);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .selected-item .si-info { flex: 1; }
+  .selected-item .si-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+  .selected-item .si-cat { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .selected-item .si-change {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(233,69,96,0.1);
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-chip {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+    font-weight: 600;
+  }
+  .filter-chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .summary-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 12px var(--shadow);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .summary-card.has-data {
+    border-left: 4px solid var(--accent);
+  }
+  .summary-card.no-data {
+    border-left: 4px solid var(--border);
+    opacity: 0.7;
+  }
+  .summary-card .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .summary-card .item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+  }
+  .summary-card .item-total {
+    font-size: 16px;
+    font-weight: 800;
+    margin-left: 10px;
+  }
+  .summary-card .item-total.has-value { color: var(--accent); }
+  .summary-card .item-total.zero { color: var(--text-muted); font-size: 14px; }
+  .summary-card .item-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .summary-card .item-cat {
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .summary-card .item-type {
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(233,69,96,0.1);
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .summary-card .item-status {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+  .summary-card .item-status.done {
+    background: rgba(46,204,113,0.15);
+    color: var(--success);
+  }
+  .summary-card .item-status.missing {
+    background: rgba(243,156,18,0.15);
+    color: var(--warning);
+  }
+  .entries-list {
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+  .entry-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 12px;
+  }
+  .entry-row .entry-user { color: var(--text-muted); font-size: 11px; }
+  .entry-row .entry-qty { font-weight: 700; color: var(--text-primary); }
+  .entry-row .entry-del {
+    margin-left: 8px;
+    color: var(--danger);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .entry-row .entry-del:active { background: rgba(231,76,60,0.1); }
+
+  .history-item {
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 8px var(--shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+  }
+  .history-item .h-info { flex: 1; }
+  .history-item .h-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+  }
+  .history-item .h-meta { font-size: 11px; color: var(--text-muted); }
+  .history-item .h-qty {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-left: 10px;
+  }
+  .history-item .h-del {
+    margin-left: 10px;
+    background: rgba(231,76,60,0.1);
+    color: var(--danger);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Стили для кнопок в истории и итогах */
+  .history-item .h-actions { display: flex; gap: 6px; margin-left: 10px; }
+  .history-item .h-btn {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.2s;
+  }
+  .history-item .h-btn.edit { color: var(--accent); }
+  .history-item .h-btn.del { color: var(--danger); }
+  .history-item .h-btn.req {
+    width: auto;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .entry-actions { display: flex; gap: 4px; margin-left: 8px; }
+  .entry-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.2s;
+  }
+  .entry-btn.edit { color: var(--accent); }
+  .entry-btn.del { color: var(--danger); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 12px var(--shadow);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .stat-box .stat-num { font-size: 24px; font-weight: 800; color: var(--accent); }
+  .stat-box .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .report-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px var(--shadow);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .report-card .r-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .report-card .r-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .report-card .r-count {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 700;
+    background: rgba(233,69,96,0.1);
+    padding: 4px 12px;
+    border-radius: 10px;
+  }
+  .report-card .r-items {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
+
+  .success-toast {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--success);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(46,204,113,0.3);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .success-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-box h3 { margin-bottom: 10px; font-size: 18px; color: var(--text-primary); }
+  .modal-box p { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+  .modal-btns { display: flex; gap: 12px; }
+  .modal-btns button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .modal-btns .btn-cancel { background: var(--bg-input); color: var(--text-primary); }
+  .modal-btns .btn-confirm { background: var(--danger); color: #fff; }
+
+  .staff-only { display: none; }
+  .is-staff .staff-only { display: block; }
+  .is-staff .chef-only { display: none !important; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+  import { getDatabase, ref, set, push, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFyCoMBSta6AYE68IH1ukGEgLSJRki0G4",
+    authDomain: "inv-dacha-2026.firebaseapp.com",
+    databaseURL: "https://inv-dacha-2026-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "inv-dacha-2026",
+    storageBucket: "inv-dacha-2026.firebasestorage.app",
+    messagingSenderId: "933996279677",
+    appId: "1:933996279677:web:00d763e6a3ee36e133be14"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.firebaseDB = db;
+  window.firebaseRef = ref;
+  window.firebaseSet = set;
+  window.firebasePush = push;
+  window.firebaseOnValue = onValue;
+  window.firebaseRemove = remove;
+  window.firebaseUpdate = update;
+  window.firebaseGet = get;
+  window.firebaseChild = child;
+
+  console.log('Firebase инициализирован');
+</script>
+
+<base target="_blank">
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-logo">📋</div>
+  <h1>Инвентаризация</h1>
+  <div class="subtitle">Кафе «Дача» — Кухня</div>
+  <div class="login-box">
+    <div class="role-selector">
+      <button class="role-btn active" onclick="selectRole('chef')" id="roleChef">👨‍🍳 Шеф</button>
+      <button class="role-btn" onclick="selectRole('staff')" id="roleStaff">👤 Персонал</button>
+    </div>
+    <input type="text" id="userName" placeholder="Ваше имя" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <input type="text" id="userPass" placeholder="Пароль" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="-webkit-text-security: disc;">
+    <button onclick="event.preventDefault(); doLogin(); return false;" type="button" style="touch-action:manipulation;">Войти в систему</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="app-header">
+    <h1>📋 Инвентаризация</h1>
+    <div class="header-actions">
+      <button class="icon-btn" id="addProdBtn" onclick="showAddProduct()" title="Добавить позицию" style="display:none;">➕</button>
+      <div class="user-info" id="headerUser">
+        <span id="userNameDisplay">Имя</span><br>
+        <span class="role-badge" id="userRoleDisplay">ШЕФ</span>
+      </div>
+      <div id="onlineIndicator" style="display:flex;align-items:center;gap:4px;margin-right:5px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#2ecc71;display:inline-block;" id="onlineDot"></span>
+        <span style="font-size:10px;color:var(--text-muted);" id="onlineCount">1 онлайн</span>
+      </div>
+      <button class="icon-btn" onclick="toggleTheme()" title="Тема">🌓</button>
+      <button class="icon-btn" onclick="doLogout()" title="Выйти">🚪</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">➕ Внести</div>
+    <div class="tab" onclick="switchTab(1)">📊 Итоги</div>
+    <div class="tab" onclick="switchTab(2)">📝 История</div>
+    <div class="tab" onclick="switchTab(3)">📈 Отчёты</div>
+    <div class="tab" onclick="switchTab(4)">🔔 Запросы</div>
+    <div class="tab" onclick="switchTab(5)">⚙️ Настройки</div>
+  </div>
+
+  <div class="tab-content active" id="tab0">
+    <div class="card">
+      <h3>🔍 Выбрать позицию</h3>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Начните печатать для поиска..." autocomplete="off" oninput="searchProducts()">
+      </div>
+      <div class="search-results" id="searchResults" style="display:none;"></div>
+      <div id="selectedProduct" style="display:none;">
+        <div class="selected-item">
+          <div class="si-info">
+            <div class="si-name" id="selName"></div>
+            <div class="si-cat" id="selCat"></div>
+          </div>
+          <div class="si-change" onclick="clearSelection()">✕ Сменить</div>
+        </div>
+      </div>
+      <div class="qty-row">
+        <div class="form-row">
+          <label>Количество</label>
+          <input type="number" id="itemQty" placeholder="0" step="0.001" min="0" inputmode="decimal">
+        </div>
+        <div class="form-row">
+          <label>Ед. изм.</label>
+          <select id="itemUnit">
+            <option value="г">г</option>
+            <option value="кг">кг</option>
+            <option value="мл">мл</option>
+            <option value="л">л</option>
+            <option value="шт">шт</option>
+            <option value="порц">порц</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Примечание</label>
+        <input type="text" id="itemNote" placeholder="Например: охлаждённый, замороженный..." autocomplete="off">
+      </div>
+      <button class="btn-primary" onclick="addItem()" type="button">✅ Добавить в инвентаризацию</button>
+    </div>
+    <div class="card" id="staffHint" style="display:none;">
+      <p style="text-align:center;color:var(--text-muted);font-size:13px;">
+        ℹ️ У вас доступ только к внесению данных.<br>Итоги и отчёты доступны шефу.
+      </p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab1">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="statTotalItems">0</div><div class="stat-label">Всего позиций</div></div>
+      <div class="stat-box"><div class="stat-num" id="statDoneItems">0</div><div class="stat-label">Считано</div></div>
+      <div class="stat-box"><div class="stat-num" id="statMissingItems">0</div><div class="stat-label">Пропущено</div></div>
+    </div>
+    <div class="filter-bar" id="filterBar">
+      <div class="filter-chip active" onclick="filterSummaryCategory('all')">Все</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Мясо')">Мясо</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Рыба')">Рыба</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Овощи')">Овощи</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Молочка')">Молочка</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Соусы/Заправки')">Соусы</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Бакалея')">Бакалея</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Бакалея жидкая')">Жидк.</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Консервы')">Конс.</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Фрукты/Ягоды')">Фрукты</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Хлеб/Выпечка')">Хлеб</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Кондитерка')">Конд.</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Заморозка')">Замор.</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Напитки')">Напитки</div>
+      <div class="filter-chip" onclick="filterSummaryCategory('Прочее')">Прочее</div>
+    </div>
+    <div id="summaryList"></div>
+  </div>
+
+  <div class="tab-content" id="tab2">
+    <div class="search-box">
+      <input type="text" id="historySearchInput" placeholder="Поиск по названию, повару или категории..." autocomplete="off" oninput="searchHistory()">
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <div class="tab-content" id="tab3">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="reportTotalUsers">0</div><div class="stat-label">Сотрудников</div></div>
+      <div class="stat-box"><div class="stat-num" id="reportTotalEntries">0</div><div class="stat-label">Всего записей</div></div>
+      <div class="stat-box"><div class="stat-num" id="reportTotalProducts">0</div><div class="stat-label">Позиций</div></div>
+    </div>
+    <div class="filter-bar" id="reportFilterBar">
+      <div class="filter-chip active" onclick="filterReportType('all')">Все</div>
+      <div class="filter-chip" onclick="filterReportType('Товар')">Товары</div>
+      <div class="filter-chip" onclick="filterReportType('ПФ')">ПФ</div>
+      <div class="filter-chip" onclick="filterReportType('Барашкино')">Барашкино</div>
+    </div>
+    <div id="reportsList"></div>
+  </div>
+
+  <div class="tab-content" id="tab4">
+    <div id="requestsList"></div>
+  </div>
+
+  <div class="tab-content" id="tab5">
+    <div class="card">
+      <h3>📦 База продуктов</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
+        Всего позиций: <span id="prodCount">0</span> 
+        (Товаров: <span id="prodGoods">0</span>, 
+        ПФ: <span id="prodPF">0</span>, 
+        Барашкино: <span id="prodBar">0</span>)
+      </p>
+      <button class="btn-secondary" onclick="exportProductsJSON()" type="button" style="margin-bottom:10px;">💾 Скачать базу продуктов</button>
+      <input type="file" id="prodImportFile" accept=".json" style="margin-bottom:10px;width:100%;font-size:14px;padding:10px;border:2px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text-primary);" onchange="importProductsFromFile(this)">
+      <p style="font-size:12px;color:var(--text-muted);">Загрузить внешнюю базу продуктов (.json)</p>
+    </div>
+    <div class="card">
+      <h3>📤 Экспорт данных</h3>
+      <button class="btn-secondary" onclick="exportToCSV()" type="button" style="margin-bottom:10px;">📄 Скачать CSV (Excel)</button>
+      <button class="btn-secondary" onclick="exportToJSON()" type="button">💾 Скачать JSON (бэкап)</button>
+    </div>
+    <div class="card">
+      <h3>📥 Импорт данных</h3>
+      <input type="file" id="importFile" accept=".json" style="margin-bottom:10px;width:100%;font-size:14px;padding:10px;border:2px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text-primary);" onchange="importFromFile(this)">
+      <p style="font-size:12px;color:var(--text-muted);">Загрузите ранее сохранённый .json файл</p>
+    </div>
+    <div class="card">
+      <h3>🗑️ Очистка</h3>
+      <button class="btn-secondary" onclick="showClearModal()" type="button" style="border-color:var(--danger);color:var(--danger);">Очистить всю инвентаризацию</button>
+    </div>
+  </div>
+  <div class="success-toast" id="toast">✅ Добавлено!</div>
+
+<div class="modal-overlay" id="clearModal">
+  <div class="modal-box">
+    <h3>⚠️ Внимание</h3>
+    <p>Все данные инвентаризации будут удалены. Это действие нельзя отменить.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="hideClearModal()" type="button">Отмена</button>
+      <button class="btn-confirm" onclick="clearAllData()" type="button">Удалить всё</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h3>✏️ Изменить количество</h3>
+    <p id="editModalText">Новое количество:</p>
+    <input type="number" id="editNewQty" placeholder="0" step="0.001" min="0" inputmode="decimal" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-size:15px;background:var(--bg-input);color:var(--text-primary);margin-bottom:20px;">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()" type="button">Отмена</button>
+      <button class="btn-confirm" onclick="confirmEditRequest()" type="button" style="background:var(--accent);color:#fff;">Отправить запрос</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно просмотра записей пользователя -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal-box" style="max-width: 500px; text-align: left;">
+    <h3 id="userModalTitle">Записи пользователя</h3>
+    <div id="userModalContent" style="max-height: 400px; overflow-y: auto; margin-top: 12px;"></div>
+    <div class="modal-btns" style="margin-top: 16px;">
+      <button class="btn-cancel" onclick="closeUserModal()" type="button" style="width: 100%;">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const USER_CONFIG = [
+  { name: 'Дима', role: 'chef', password: 'chef-dacha-2026', label: 'Шеф-повар' },
+  { name: 'Надежда', role: 'sous', password: 'sous-dacha-2026', label: 'Су-шеф' },
+  { name: 'Бухгалтер', role: 'accountant', password: 'buh-dacha-2026', label: 'Бухгалтер' }
+];
+const ROLE_LABELS = { chef: 'ШЕФ', sous: 'СУ-ШЕФ', accountant: 'БУХГАЛТЕР', cook: 'ПОВАР' };
+let currentUser = null;
+let entries = [];
+let pending = [];
+let currentSummaryFilter = 'all';
+let currentReportFilter = 'all';
+let selectedProduct = null;
+let editTargetId = null;
+let currentTheme = 'dark';
+const KEY_ENTRIES = 'inv_entries_v3';
+const KEY_PENDING = 'inv_pending_v3';
+const KEY_THEME = 'inv_theme_v3';
+
+function loadData() {
+  try {
+    const e = localStorage.getItem(KEY_ENTRIES);
+    if (e) entries = JSON.parse(e);
+    const p = localStorage.getItem(KEY_PENDING);
+    if (p) pending = JSON.parse(p);
+  } catch(e) { entries = []; pending = []; }
+  if (window.firebaseDB) {
+    syncFromFirebase();
+  }
+}
+
+function syncFromFirebase() {
+  const db = window.firebaseDB;
+  const ref = window.firebaseRef;
+  const onValue = window.firebaseOnValue;
+
+  const entriesRef = ref(db, 'inventory/entries');
+  onValue(entriesRef, function(snapshot) {
+    const data = snapshot.val();
+    if (data) {
+      entries = Object.values(data);
+      saveEntriesLocal();
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        const idx = Array.from(document.querySelectorAll('.tab')).indexOf(activeTab);
+        if (idx === 1) updateSummary();
+        if (idx === 2) updateHistory();
+        if (idx === 3) updateReports();
+      }
+    }
+  });
+
+  const pendingRef = ref(db, 'inventory/pending');
+  onValue(pendingRef, function(snapshot) {
+    const data = snapshot.val();
+    if (data) {
+      pending = Object.values(data);
+      savePendingLocal();
+      updateBadge();
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        const idx = Array.from(document.querySelectorAll('.tab')).indexOf(activeTab);
+        if (idx === 4) updateRequests();
+      }
+    }
+  });
+
+  const presenceRef = ref(db, 'presence/' + currentUser.name);
+  const set = window.firebaseSet;
+  set(presenceRef, {
+    online: true,
+    role: currentUser.role,
+    lastSeen: new Date().toISOString()
+  });
+
+  window.addEventListener('beforeunload', function() {
+    set(presenceRef, null);
+  });
+}
+
+function saveEntriesLocal() {
+  localStorage.setItem(KEY_ENTRIES, JSON.stringify(entries));
+}
+
+function savePendingLocal() {
+  localStorage.setItem(KEY_PENDING, JSON.stringify(pending));
+}
+
+function saveEntryToFirebase(entry) {
+  if (!window.firebaseDB) return;
+  const db = window.firebaseDB;
+  const ref = window.firebaseRef;
+  const push = window.firebasePush;
+  const set = window.firebaseSet;
+
+  const newRef = push(ref(db, 'inventory/entries'));
+  set(newRef, entry);
+}
+
+function removeEntryFromFirebase(entryId) {
+  if (!window.firebaseDB) return;
+  const db = window.firebaseDB;
+  const ref = window.firebaseRef;
+  const remove = window.firebaseRemove;
+
+  const entriesRef = ref(db, 'inventory/entries');
+  window.firebaseGet(entriesRef).then(function(snapshot) {
+    const data = snapshot.val();
+    if (data) {
+      for (var key in data) {
+        if (data[key].id === entryId) {
+          remove(ref(db, 'inventory/entries/' + key));
+          break;
+        }
+      }
+    }
+  });
+}
+
+function savePendingToFirebase(pendingItem) {
+  if (!window.firebaseDB) return;
+  const db = window.firebaseDB;
+  const ref = window.firebaseRef;
+  const push = window.firebasePush;
+  const set = window.firebaseSet;
+
+  const newRef = push(ref(db, 'inventory/pending'));
+  set(newRef, pendingItem);
+}
+
+function updatePendingInFirebase(pendingId, status) {
+  if (!window.firebaseDB) return;
+  const db = window.firebaseDB;
+  const ref = window.firebaseRef;
+  const get = window.firebaseGet;
+  const update = window.firebaseUpdate;
+
+  const pendingRef = ref(db, 'inventory/pending');
+  get(pendingRef).then(function(snapshot) {
+    const data = snapshot.val();
+    if (data) {
+      for (var key in data) {
+        if (data[key].id === pendingId) {
+          update(ref(db, 'inventory/pending/' + key), { status: status });
+          break;
+        }
+      }
+    }
+  });
+}
+
+function saveEntries() { 
+  saveEntriesLocal();
+  if (entries.length > 0 && window.firebaseDB) {
+    saveEntryToFirebase(entries[entries.length - 1]);
+  }
+}
+
+function savePending() { 
+  savePendingLocal();
+  if (pending.length > 0 && window.firebaseDB) {
+    savePendingToFirebase(pending[pending.length - 1]);
+  }
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem(KEY_THEME);
+  if (saved) { currentTheme = saved; document.documentElement.setAttribute('data-theme', currentTheme); }
+}
+
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  localStorage.setItem(KEY_THEME, currentTheme);
+}
+
+function checkUserName() {
+  const name = document.getElementById('userName').value.trim();
+  const passField = document.getElementById('passField');
+  const known = USER_CONFIG.find(u => u.name.toLowerCase() === name.toLowerCase());
+  if (known) { passField.classList.add('show'); }
+  else { passField.classList.remove('show'); document.getElementById('userPass').value = ''; }
+}
+
+function selectRole(role) {
+  document.getElementById('roleChef').classList.toggle('active', role === 'chef');
+  document.getElementById('roleStaff').classList.toggle('active', role === 'staff');
+}
+
+function showAddProduct() {
+  const card = document.getElementById('addProductCard');
+  if (!card) return;
+  if (card.style.display === 'none' || card.style.display === '') {
+    card.style.display = 'block';
+    document.getElementById('newProdName').focus();
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+function addNewProduct() {
+  const name = document.getElementById('newProdName').value.trim();
+  const category = document.getElementById('newProdCategory').value;
+  const type = document.getElementById('newProdType').value;
+  const unit = document.getElementById('newProdUnit').value;
+
+  if (!name) { showToast('Введите название'); return; }
+
+  const exists = PRODUCT_BASE.some(p => p.name.toLowerCase() === name.toLowerCase());
+  if (exists) { showToast('Такая позиция уже есть в базе'); return; }
+
+  const newProduct = { name: name, category: category, unit: unit, type: type };
+  PRODUCT_BASE.push(newProduct);
+
+  const catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Бакалея жидкая','Консервы','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Заморозка','Напитки','Прочее'];
+  const typeOrder = {'Товар': 0, 'ПФ': 1, 'Барашкино': 2};
+  PRODUCT_BASE.sort(function(a,b) {
+    var ca = catOrder.indexOf(a.category); var cb = catOrder.indexOf(b.category);
+    if (ca !== cb) return ca - cb;
+    var ta = typeOrder[a.type] || 99; var tb = typeOrder[b.type] || 99;
+    if (ta !== tb) return ta - tb;
+    return a.name.localeCompare(b.name);
+  });
+
+  localStorage.setItem('inv_products_v4', JSON.stringify(PRODUCT_BASE));
+
+  document.getElementById('newProdName').value = '';
+  document.getElementById('addProductCard').style.display = 'none';
+
+  showToast('✅ Позиция «' + name + '» добавлена!');
+}
+
+function loadCustomProducts() {
+  try {
+    var saved = localStorage.getItem('inv_products_v4');
+    if (saved) {
+      var custom = JSON.parse(saved);
+      custom.forEach(function(cp) {
+        var exists = PRODUCT_BASE.some(function(p) { return p.name === cp.name; });
+        if (!exists) PRODUCT_BASE.push(cp);
+      });
+      var catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Бакалея жидкая','Консервы','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Заморозка','Напитки','Прочее'];
+      var typeOrder = {'Товар': 0, 'ПФ': 1, 'Барашкино': 2};
+      PRODUCT_BASE.sort(function(a,b) {
+        var ca = catOrder.indexOf(a.category); var cb = catOrder.indexOf(b.category);
+        if (ca !== cb) return ca - cb;
+        var ta = typeOrder[a.type] || 99; var tb = typeOrder[b.type] || 99;
+        if (ta !== tb) return ta - tb;
+        return a.name.localeCompare(b.name);
+      });
+    }
+  } catch(e) {}
+}
+
+function doLogin() {
+  if (window._loggingIn) return;
+  window._loggingIn = true;
+  setTimeout(function() { window._loggingIn = false; }, 500);
+
+  const loginScreen = document.getElementById('loginScreen');
+  if (loginScreen.style.display === 'none') return;
+
+  const nameInput = document.getElementById('userName').value.trim();
+  const passInput = document.getElementById('userPass').value.trim();
+  const err = document.getElementById('loginError');
+  if (!nameInput) { err.textContent = 'Введите имя'; err.style.display = 'block'; return; }
+
+  const known = USER_CONFIG.find(u => u.name.toLowerCase() === nameInput.toLowerCase());
+  if (known) {
+    if (!passInput) { err.textContent = 'Введите пароль'; err.style.display = 'block'; return; }
+    if (passInput !== known.password) { err.textContent = 'Неверный пароль'; err.style.display = 'block'; return; }
+    currentUser = { name: known.name, role: known.role, label: known.label };
+  } else {
+    currentUser = { name: nameInput, role: 'cook', label: 'Повар' };
+  }
+
+  err.style.display = 'none';
+  loginScreen.style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('userNameDisplay').textContent = currentUser.name;
+  document.getElementById('userRoleDisplay').textContent = ROLE_LABELS[currentUser.role];
+
+  setupTabsForRole();
+  loadData();
+  updateBadge();
+  switchTab(0);
+  showToast('Добро пожаловать, ' + currentUser.name + '!');
+
+  if (window.firebaseDB) {
+    setupOnlinePresence();
+  }
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('userName').value = '';
+  document.getElementById('userPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('passField') && (document.getElementById('passField').classList.remove('show'));
+  clearSelection();
+}
+
+function setupOnlinePresence() {
+  const db = window.firebaseDB;
+  const ref = window.firebaseRef;
+  const onValue = window.firebaseOnValue;
+  const set = window.firebaseSet;
+
+  const myPresenceRef = ref(db, 'presence/' + currentUser.name);
+  set(myPresenceRef, {
+    online: true,
+    role: currentUser.role,
+    lastSeen: new Date().toISOString()
+  });
+
+  const allPresenceRef = ref(db, 'presence');
+  onValue(allPresenceRef, function(snapshot) {
+    const data = snapshot.val();
+    if (data) {
+      const onlineUsers = Object.keys(data).filter(function(k) {
+        return data[k].online === true;
+      });
+      const count = onlineUsers.length;
+      const dot = document.getElementById('onlineDot');
+      const countEl = document.getElementById('onlineCount');
+      if (dot && countEl) {
+        dot.style.background = count > 1 ? '#2ecc71' : '#f39c12';
+        countEl.textContent = count + ' онлайн';
+      }
+    }
+  });
+
+  window.addEventListener('beforeunload', function() {
+    set(myPresenceRef, null);
+  });
+}
+
+function setupTabsForRole() {
+  const role = currentUser.role;
+  const tabs = document.querySelectorAll('.tab');
+  const staffHint = document.getElementById('staffHint');
+  const addBtn = document.getElementById('addProdBtn');
+  const addCard = document.getElementById('addProductCard');
+
+  tabs.forEach(function(t) { if (t) t.style.display = 'flex'; });
+  if (staffHint) staffHint.style.display = 'none';
+  if (addBtn) addBtn.style.display = 'none';
+  if (addCard) addCard.style.display = 'none';
+
+  if (role === 'chef') {
+    if (addBtn) addBtn.style.display = 'flex';
+  } else if (role === 'sous') {
+    if (addBtn) addBtn.style.display = 'flex';
+    if (tabs[4]) tabs[4].style.display = 'none';
+    if (tabs[5]) tabs[5].style.display = 'none';
+  } else if (role === 'accountant') {
+    if (addBtn) addBtn.style.display = 'flex';
+    if (tabs[2]) tabs[2].style.display = 'none';
+    if (tabs[4]) tabs[4].style.display = 'none';
+    if (tabs[5]) tabs[5].style.display = 'none';
+  } else if (role === 'cook') {
+    if (tabs[1]) tabs[1].style.display = 'none';
+    if (tabs[3]) tabs[3].style.display = 'none';
+    if (tabs[4]) tabs[4].style.display = 'none';
+    if (tabs[5]) tabs[5].style.display = 'none';
+    if (staffHint) staffHint.style.display = 'block';
+  }
+}
+
+function switchTab(n) {
+  document.querySelectorAll('.tab').forEach(function(t,i) { if (t) t.classList.toggle('active', i===n); });
+  document.querySelectorAll('.tab-content').forEach(function(c,i) { if (c) c.classList.toggle('active', i===n); });
+  if (n === 1) updateSummary();
+  if (n === 2) updateHistory();
+  if (n === 3) updateReports();
+  if (n === 4) updateRequests();
+}
+function goToRequests() { switchTab(4); }
+
+function searchProducts() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const results = document.getElementById('searchResults');
+  if (query.length < 2) { results.style.display = 'none'; return; }
+  const matches = PRODUCT_BASE.filter(p => p.name.toLowerCase().includes(query)).slice(0, 15);
+  if (matches.length === 0) {
+    results.innerHTML = '<div style="padding:16px;color:var(--text-muted);text-align:center;">Ничего не найдено</div>';
+    results.style.display = 'block'; return;
+  }
+  results.innerHTML = matches.map(p => {
+    const idx = PRODUCT_BASE.indexOf(p);
+    const typeLabel = p.type === 'ПФ' ? 'ПФ' : (p.type === 'Барашкино' ? 'БАРАШ' : 'ТОВАР');
+    return '<div class="search-item" onclick="selectProduct(' + idx + ')">' +
+      '<div><div class="si-name">' + p.name + '</div><div class="si-cat">' + p.category + ' &bull; ' + p.unit + '</div></div>' +
+      '<div class="si-type">' + typeLabel + '</div></div>';
+  }).join('');
+  results.style.display = 'block';
+}
+
+function selectProduct(index) {
+  selectedProduct = PRODUCT_BASE[index];
+  document.getElementById('searchResults').style.display = 'none';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('selectedProduct').style.display = 'block';
+  document.getElementById('selName').textContent = selectedProduct.name;
+  document.getElementById('selCat').textContent = selectedProduct.category + ' &bull; ' + selectedProduct.unit;
+  document.getElementById('itemUnit').value = selectedProduct.unit;
+}
+function clearSelection() {
+  selectedProduct = null;
+  document.getElementById('selectedProduct').style.display = 'none';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').style.display = 'none';
+}
+
+function addItem() {
+  if (!selectedProduct) { showToast('Сначала выберите позицию'); return; }
+  const qty = parseFloat(document.getElementById('itemQty').value);
+  const unit = document.getElementById('itemUnit').value;
+  const note = document.getElementById('itemNote').value.trim();
+  if (isNaN(qty) || qty <= 0) { showToast('Введите корректное количество'); return; }
+  const entry = {
+    id: Date.now(), name: selectedProduct.name, category: selectedProduct.category,
+    type: selectedProduct.type, qty: qty, unit: unit, note: note,
+    user: currentUser.name, role: currentUser.role,
+    time: new Date().toLocaleString('ru-RU')
+  };
+  entries.push(entry); 
+  saveEntriesLocal();
+  saveEntryToFirebase(entry);
+  document.getElementById('itemQty').value = '';
+  document.getElementById('itemNote').value = '';
+  clearSelection();
+  showToast(entry.name + ' — ' + qty + ' ' + unit);
+}
+
+function normalizeUnit(qty, unit) {
+  if (unit === 'кг' || unit === 'л') return qty * 1000;
+  return qty;
+}
+function formatUnit(total, originalUnit) {
+  if (originalUnit === 'кг' || originalUnit === 'л') {
+    if (total >= 1000) return (total/1000).toFixed(3).replace(/\.?0+$/, '') + (originalUnit === 'кг' ? ' кг' : ' л');
+    return total + (originalUnit === 'кг' ? ' г' : ' мл');
+  }
+  return total + ' ' + originalUnit;
+}
+
+function filterSummaryCategory(cat) {
+  currentSummaryFilter = cat;
+  document.querySelectorAll('#filterBar .filter-chip').forEach(c => {
+    c.classList.toggle('active',
+      (cat === 'all' && c.textContent === 'Все') ||
+      (cat === 'Мясо' && c.textContent === 'Мясо') ||
+      (cat === 'Рыба' && c.textContent === 'Рыба') ||
+      (cat === 'Овощи' && c.textContent === 'Овощи') ||
+      (cat === 'Молочка' && c.textContent === 'Молочка') ||
+      (cat === 'Соусы/Заправки' && c.textContent === 'Соусы') ||
+      (cat === 'Бакалея' && c.textContent === 'Бакалея') ||
+      (cat === 'Бакалея жидкая' && c.textContent === 'Жидк.') ||
+      (cat === 'Консервы' && c.textContent === 'Конс.') ||
+      (cat === 'Фрукты/Ягоды' && c.textContent === 'Фрукты') ||
+      (cat === 'Хлеб/Выпечка' && c.textContent === 'Хлеб') ||
+      (cat === 'Кондитерка' && c.textContent === 'Конд.') ||
+      (cat === 'Заморозка' && c.textContent === 'Замор.') ||
+      (cat === 'Напитки' && c.textContent === 'Напитки') ||
+      (cat === 'Прочее' && c.textContent === 'Прочее')
+    );
+  });
+  updateSummary();
+}
+
+function updateProductCount() {
+  var goods = PRODUCT_BASE.filter(function(p){ return p.type === 'Товар'; }).length;
+  var pf = PRODUCT_BASE.filter(function(p){ return p.type === 'ПФ'; }).length;
+  var bar = PRODUCT_BASE.filter(function(p){ return p.type === 'Барашкино'; }).length;
+  var el1 = document.getElementById('prodCount');
+  var el2 = document.getElementById('prodGoods');
+  var el3 = document.getElementById('prodPF');
+  var el4 = document.getElementById('prodBar');
+  if (el1) el1.textContent = PRODUCT_BASE.length;
+  if (el2) el2.textContent = goods;
+  if (el3) el3.textContent = pf;
+  if (el4) el4.textContent = bar;
+}
+
+function exportProductsJSON() {
+  var data = { exportDate: new Date().toISOString(), totalProducts: PRODUCT_BASE.length, products: PRODUCT_BASE };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'products_base_' + new Date().toLocaleDateString('ru-RU').replace(/\./g,'-') + '.json';
+  link.click();
+  showToast('База продуктов сохранена');
+}
+
+function importProductsFromFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (data.products && Array.isArray(data.products)) {
+        if (confirm('Загрузить ' + data.products.length + ' позиций? Текущие будут заменены.')) {
+          PRODUCT_BASE = data.products;
+          localStorage.setItem('inv_products_v4', JSON.stringify(PRODUCT_BASE));
+          updateProductCount();
+          showToast('База продуктов обновлена');
+        }
+      } else { alert('Неверный формат файла'); }
+    } catch(err) { alert('Ошибка чтения файла'); }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function updateSummary() {
+  updateProductCount();
+  const list = document.getElementById('summaryList');
+  if (currentUser.role === 'cook') {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128274;</div><p>Доступ к итогам только шефу, су-шефу и бухгалтеру</p></div>';
+    document.getElementById('statTotalItems').textContent = '—';
+    document.getElementById('statDoneItems').textContent = '—';
+    document.getElementById('statMissingItems').textContent = '—';
+    return;
+  }
+  const entryGroups = {};
+  entries.forEach(e => {
+    const key = e.name + '|' + e.category + '|' + e.unit;
+    if (!entryGroups[key]) entryGroups[key] = { name: e.name, category: e.category, unit: e.unit, total: 0, entries: [] };
+    entryGroups[key].total += normalizeUnit(e.qty, e.unit);
+    entryGroups[key].entries.push(e);
+  });
+  let allItems = PRODUCT_BASE.map(product => {
+    const key = product.name + '|' + product.category + '|' + product.unit;
+    const hasData = entryGroups[key];
+    return { name: product.name, category: product.category, unit: product.unit, type: product.type,
+      total: hasData ? hasData.total : 0, entries: hasData ? hasData.entries : [], hasData: !!hasData };
+  });
+  if (currentSummaryFilter !== 'all') allItems = allItems.filter(i => i.category === currentSummaryFilter);
+  const catOrder = ['Мясо','Рыба','Овощи','Молочка','Бакалея','Соусы/Заправки','Фрукты/Ягоды','Хлеб/Выпечка','Кондитерка','Бакалея жидкая','Консервы','Заморозка','Напитки','Прочее'];
+  allItems.sort((a,b) => {
+    if (a.hasData !== b.hasData) return b.hasData - a.hasData;
+    const ca = catOrder.indexOf(a.category); const cb = catOrder.indexOf(b.category);
+    if (ca !== cb) return ca - cb;
+    return a.name.localeCompare(b.name);
+  });
+  document.getElementById('statTotalItems').textContent = allItems.length;
+  document.getElementById('statDoneItems').textContent = allItems.filter(i => i.hasData).length;
+  document.getElementById('statMissingItems').textContent = allItems.filter(i => !i.hasData).length;
+
+  list.innerHTML = allItems.map(item => {
+    const totalStr = item.hasData ? formatUnit(item.total, item.unit) : '—';
+    const cardClass = item.hasData ? 'has-data' : 'no-data';
+    const totalClass = item.hasData ? 'has-value' : 'zero';
+    const statusClass = item.hasData ? 'done' : 'missing';
+    const statusText = item.hasData ? '&#10003; Считано' : '&#9888; Не считано';
+    const typeLabel = item.type === 'ПФ' ? 'ПФ' : (item.type === 'Барашкино' ? 'БАРАШ' : 'ТОВАР');
+    const canAct = currentUser.role === 'chef';
+    const entriesHtml = item.entries.length > 0 ?
+      '<div class="entries-list">' + item.entries.map(e =>
+        '<div class="entry-row">' +
+          '<span class="entry-user">' + e.user + ' &bull; ' + e.time.split(',')[0] + '</span>' +
+          '<span class="entry-qty">+' + e.qty + ' ' + e.unit + '</span>' +
+          (canAct ? '<div class="entry-actions">' +
+            '<button class="entry-btn edit" onclick="chefEditEntry(' + e.id + ')">&#9999;&#65039;</button>' +
+            '<button class="entry-btn del" onclick="chefDeleteEntry(' + e.id + ')">&#128465;</button></div>' : '') +
+        '</div>'
+      ).join('') + '</div>' : '';
+    return '<div class="summary-card ' + cardClass + '">' +
+      '<div class="item-header"><span class="item-name">' + item.name + '</span><span class="item-total ' + totalClass + '">' + totalStr + '</span></div>' +
+      '<div class="item-meta"><span class="item-cat">' + item.category + '</span><span class="item-type">' + typeLabel + '</span><span class="item-status ' + statusClass + '">' + statusText + '</span></div>' +
+      entriesHtml + '</div>';
+  }).join('');
+}
+
+/* ===== ПУНКТ 1: Поиск по внесённым позициям ===== */
+function searchHistory() {
+  updateHistory();
+}
+
+function updateHistory() {
+  const list = document.getElementById('historyList');
+  const query = (document.getElementById('historySearchInput') && document.getElementById('historySearchInput').value || '').trim().toLowerCase();
+  let visible = [...entries];
+  if (currentUser.role === 'cook') visible = visible.filter(e => e.user === currentUser.name);
+  
+  if (query) {
+    visible = visible.filter(e => 
+      e.name.toLowerCase().includes(query) || 
+      e.user.toLowerCase().includes(query) ||
+      (e.category && e.category.toLowerCase().includes(query))
+    );
+  }
+  
+  visible.sort((a,b) => b.id - a.id);
+  if (visible.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128336;</div><p>История пуста</p></div>';
+    return;
+  }
+  list.innerHTML = visible.map(e => {
+    const canDelete = currentUser.role === 'chef';
+    const canRequestEdit = currentUser.role !== 'chef';
+    const canRequestDel = currentUser.role === 'sous' || currentUser.role === 'chef';
+    let actions = '';
+    if (canDelete) {
+      actions = '<button class="h-btn edit" onclick="chefEditEntry(' + e.id + ')" type="button">&#9999;&#65039;</button>' +
+                '<button class="h-btn del" onclick="chefDeleteEntry(' + e.id + ')" type="button">&#215;</button>';
+    } else if (canRequestEdit) {
+      actions = '<button class="h-btn req" onclick="requestEdit(' + e.id + ')" type="button">&#9999;&#65039; Запрос</button>';
+    }
+    if (currentUser.role === 'sous' && !canDelete) {
+      actions += '<button class="h-btn del" onclick="requestDelete(' + e.id + ')" type="button">&#128465;</button>';
+    }
+    return '<div class="history-item">' +
+      '<div class="h-info"><div class="h-name">' + e.name + '</div><div class="h-meta">' + e.user + ' &bull; ' + e.time + (e.note ? ' &bull; ' + e.note : '') + '</div></div>' +
+      '<div class="h-qty">+' + e.qty + ' ' + e.unit + '</div>' +
+      '<div class="h-actions">' + actions + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ===== ПУНКТ 2: Клик на участника открывает его записи ===== */
+function showUserEntries(userName) {
+  const userEntries = entries.filter(e => e.user === userName).sort((a,b) => b.id - a.id);
+  const modal = document.getElementById('userModal');
+  const title = document.getElementById('userModalTitle');
+  const content = document.getElementById('userModalContent');
+  
+  title.textContent = '📋 ' + userName + ' — ' + userEntries.length + ' записей';
+  
+  if (userEntries.length === 0) {
+    content.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;"><div style="font-size:32px;margin-bottom:10px;">📭</div><p>Нет записей</p></div>';
+  } else {
+    content.innerHTML = userEntries.map(e => {
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="font-weight:700;font-size:14px;color:var(--text-primary);">' + e.name + '</div>' +
+        '<div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">' + e.qty + ' ' + e.unit + ' &bull; ' + e.category + '</div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + e.time + (e.note ? ' &bull; 📝 ' + e.note : '') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  
+  modal.classList.add('show');
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').classList.remove('show');
+}
+
+function requestEdit(entryId) {
+  const entry = entries.find(e => e.id === entryId);
+  if (!entry) return;
+  if (currentUser.role === 'cook' && entry.user !== currentUser.name) {
+    showToast('Можно изменять только свои записи'); return;
+  }
+  editTargetId = entryId;
+  document.getElementById('editModalText').textContent = entry.name + ': текущее ' + entry.qty + ' ' + entry.unit + '. Новое количество:';
+  document.getElementById('editNewQty').value = '';
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('show');
+  editTargetId = null;
+}
+function confirmEditRequest() {
+  const newQty = parseFloat(document.getElementById('editNewQty').value);
+  if (isNaN(newQty) || newQty <= 0) { showToast('Введите корректное количество'); return; }
+  const entry = entries.find(e => e.id === editTargetId);
+  if (!entry) return;
+  pending.push({
+    id: Date.now(), type: 'edit', entryId: editTargetId, newQty: newQty, newUnit: entry.unit,
+    requestedBy: currentUser.name, requesterRole: currentUser.role,
+    timestamp: new Date().toLocaleString('ru-RU'),
+    desc: entry.name + ': ' + entry.qty + ' &rarr; ' + newQty + ' ' + entry.unit
+  });
+  savePending(); updateBadge(); closeEditModal();
+  showToast('Запрос на изменение отправлен шефу');
+}
+function requestDelete(entryId) {
+  const entry = entries.find(e => e.id === entryId);
+  if (!entry) return;
+  if (!confirm('Отправить запрос на удаление записи «' + entry.name + '» шефу?')) return;
+  pending.push({
+    id: Date.now(), type: 'delete', entryId: entryId,
+    requestedBy: currentUser.name, requesterRole: currentUser.role,
+    timestamp: new Date().toLocaleString('ru-RU'),
+    desc: 'Удалить «' + entry.name + '» (' + entry.qty + ' ' + entry.unit + ')'
+  });
+  savePending(); updateBadge();
+  showToast('Запрос на удаление отправлен шефу');
+}
+
+function chefDeleteEntry(id) {
+  if (currentUser.role !== 'chef') return;
+  if (!confirm('Удалить эту запись?')) return;
+  entries = entries.filter(e => e.id !== id);
+  saveEntriesLocal();
+  removeEntryFromFirebase(id);
+  updateSummary(); updateHistory(); updateReports();
+  showToast('Запись удалена');
+}
+function chefEditEntry(id) {
+  if (currentUser.role !== 'chef') return;
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
+  const newQty = prompt('Новое количество для «' + entry.name + '» (текущее: ' + entry.qty + ' ' + entry.unit + '):');
+  if (newQty === null) return;
+  const qty = parseFloat(newQty);
+  if (isNaN(qty) || qty <= 0) { showToast('Некорректное значение'); return; }
+  entry.qty = qty;
+  saveEntries();
+  updateSummary(); updateHistory(); updateReports();
+  showToast('Запись изменена');
+}
+
+function updateBadge() {
+  const badge = document.getElementById('requestsBadge');
+  const count = pending.filter(p => p.status !== 'approved' && p.status !== 'rejected').length;
+  if (count > 0) { badge.textContent = count; badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+}
+function updateRequests() {
+  const list = document.getElementById('requestsList');
+  if (currentUser.role !== 'chef') {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128274;</div><p>Только для шефа</p></div>';
+    return;
+  }
+  const active = pending.filter(p => p.status !== 'approved' && p.status !== 'rejected');
+  if (active.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128235;</div><p>Нет новых запросов</p></div>';
+    return;
+  }
+  list.innerHTML = active.map(p => {
+    const roleLabel = ROLE_LABELS[p.requesterRole] || p.requesterRole;
+    return '<div class="pending-card">' +
+      '<div class="p-header"><span class="p-user">' + p.requestedBy + '</span><span class="p-role">' + roleLabel + '</span></div>' +
+      '<div class="p-desc">' + (p.type === 'edit' ? '&#9999;&#65039; Изменить: ' : '&#128465; Удалить: ') + p.desc + '</div>' +
+      '<div class="p-time">' + p.timestamp + '</div>' +
+      '<div class="pending-actions">' +
+        '<button class="btn-approve" onclick="approveRequest(' + p.id + ')">&#9989; Одобрить</button>' +
+        '<button class="btn-reject" onclick="rejectRequest(' + p.id + ')">&#10060; Отклонить</button>' +
+      '</div></div>';
+  }).join('');
+}
+function approveRequest(pid) {
+  const req = pending.find(p => p.id === pid);
+  if (!req) return;
+  if (req.type === 'delete') { entries = entries.filter(e => e.id !== req.entryId); }
+  else if (req.type === 'edit') {
+    const entry = entries.find(e => e.id === req.entryId);
+    if (entry) { entry.qty = req.newQty; entry.unit = req.newUnit; }
+  }
+  req.status = 'approved';
+  saveEntriesLocal(); savePendingLocal();
+  updatePendingInFirebase(pid, 'approved');
+  updateRequests(); updateSummary(); updateHistory(); updateReports(); updateBadge();
+  showToast('Запрос одобрен');
+}
+function rejectRequest(pid) {
+  const req = pending.find(p => p.id === pid);
+  if (!req) return;
+  req.status = 'rejected';
+  savePendingLocal();
+  updatePendingInFirebase(pid, 'rejected');
+  updateRequests(); updateBadge();
+  showToast('Запрос отклонён');
+}
+
+function filterReportType(type) {
+  currentReportFilter = type;
+  document.querySelectorAll('#tab3 .filter-chip').forEach(c => {
+    c.classList.toggle('active',
+      (type === 'all' && c.textContent === 'Все') ||
+      (type === 'Товар' && c.textContent === 'Товары') ||
+      (type === 'ПФ' && c.textContent === 'ПФ') ||
+      (type === 'Барашкино' && c.textContent === 'Барашкино')
+    );
+  });
+  updateReports();
+}
+
+/* ===== ПУНКТ 2 (продолжение): Клик на участника в отчётах ===== */
+function updateReports() {
+  const list = document.getElementById('reportsList');
+  if (currentUser.role === 'cook') {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128274;</div><p>Доступ к отчётам ограничен</p></div>';
+    document.getElementById('reportTotalUsers').textContent = '—';
+    document.getElementById('reportTotalEntries').textContent = '—';
+    document.getElementById('reportTotalProducts').textContent = '—';
+    return;
+  }
+  let filteredEntries = entries;
+  if (currentReportFilter !== 'all') filteredEntries = entries.filter(e => e.type === currentReportFilter);
+  const users = {};
+  filteredEntries.forEach(e => {
+    if (!users[e.user]) users[e.user] = { name: e.user, role: e.role, count: 0, items: {}, categories: {} };
+    users[e.user].count++;
+    users[e.user].items[e.name] = (users[e.user].items[e.name] || 0) + 1;
+    users[e.user].categories[e.category] = (users[e.user].categories[e.category] || 0) + 1;
+  });
+  const userList = Object.values(users).sort((a,b) => b.count - a.count);
+  document.getElementById('reportTotalUsers').textContent = userList.length;
+  document.getElementById('reportTotalEntries').textContent = filteredEntries.length;
+  document.getElementById('reportTotalProducts').textContent = Object.keys(
+    filteredEntries.reduce((acc,e) => { acc[e.name] = true; return acc; }, {})
+  ).length;
+  if (userList.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#128202;</div><p>Нет данных для отчёта</p></div>';
+    return;
+  }
+  list.innerHTML = userList.map(u => {
+    const topItems = Object.entries(u.items).sort((a,b) => b[1]-a[1]).slice(0,5).map(([n,c]) => n+' ('+c+')').join(', ');
+    const topCats = Object.entries(u.categories).sort((a,b) => b[1]-a[1]).slice(0,3).map(([c,n]) => c+': '+n).join(' &bull; ');
+    const roleIcon = u.role==='chef'?'&#128104;&#8205;&#127859;':(u.role==='cook'?'&#128100;':'&#128221;');
+    return '<div class="report-card">' +
+      '<div class="r-header">' +
+        '<span class="r-name" style="cursor:pointer;text-decoration:underline;" onclick="showUserEntries(\'' + u.name.replace(/'/g, "\\'") + '\')">' + roleIcon + ' ' + u.name + '</span>' +
+        '<span class="r-count">' + u.count + ' записей</span>' +
+      '</div>' +
+      '<div class="r-items"><strong>Топ позиций:</strong> ' + topItems + '<br><strong>Категории:</strong> ' + topCats + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function exportToCSV() {
+  let csv = '\uFEFFНазвание;Категория;Тип;Ед.изм.;Итого;Статус;Записи;Пользователи\n';
+  PRODUCT_BASE.forEach(product => {
+    const productEntries = entries.filter(e => e.name === product.name && e.category === product.category);
+    const total = productEntries.reduce((sum, e) => sum + normalizeUnit(e.qty, e.unit), 0);
+    const totalStr = total > 0 ? formatUnit(total, product.unit) : '0';
+    const status = total > 0 ? 'Считано' : 'Не считано';
+    const users = [...new Set(productEntries.map(e => e.user))].join(', ');
+    const typeLabel = product.type === 'ПФ' ? 'ПФ' : (product.type === 'Барашкино' ? 'Барашкино' : 'Товар');
+    csv += '"' + product.name + '";"' + product.category + '";"' + typeLabel + '";"' + product.unit + '";"' + totalStr + '";"' + status + '";"' + productEntries.length + '";"' + users + '"\n';
+  });
+  csv += '\n\nДЕТАЛЬНЫЕ ЗАПИСИ\n';
+  csv += 'Название;Категория;Количество;Ед.изм.;Пользователь;Роль;Дата;Примечание\n';
+  entries.forEach(e => {
+    csv += '"' + e.name + '";"' + e.category + '";"' + e.qty + '";"' + e.unit + '";"' + e.user + '";"' + e.role + '";"' + e.time + '";"' + (e.note||'') + '"\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'инвентаризация_' + new Date().toLocaleDateString('ru-RU').replace(/\./g,'-') + '.csv';
+  link.click();
+  showToast('Отчёт CSV сохранён');
+}
+
+function exportToJSON() {
+  const data = { exportDate: new Date().toISOString(), totalEntries: entries.length, totalProducts: PRODUCT_BASE.length, entries, pending };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'inv_backup_' + new Date().toLocaleDateString('ru-RU').replace(/\./g,'-') + '.json';
+  link.click();
+  showToast('Резервная копия сохранена');
+}
+
+function importFromFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.entries && Array.isArray(data.entries)) {
+        if (confirm('Загрузить ' + data.entries.length + ' записей? Текущие будут заменены.')) {
+          entries = data.entries || []; pending = data.pending || [];
+          saveEntries(); savePending();
+          updateSummary(); updateHistory(); updateReports(); updateBadge();
+          showToast('Данные загружены');
+        }
+      } else { alert('Неверный формат файла'); }
+    } catch(err) { alert('Ошибка чтения файла'); }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function showClearModal() { document.getElementById('clearModal').classList.add('show'); }
+function hideClearModal() { document.getElementById('clearModal').classList.remove('show'); }
+function clearAllData() {
+  if (currentUser.role !== 'chef') { showToast('Только шеф может очищать данные'); return; }
+  entries = []; pending = [];
+  saveEntries(); savePending();
+  hideClearModal();
+  updateSummary(); updateHistory(); updateReports(); updateRequests(); updateBadge();
+  showToast('Все данные очищены');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  loadData();
+  loadTheme();
+  loadCustomProducts();
+  document.getElementById('userName').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const known = USER_CONFIG.find(u => u.name.toLowerCase() === this.value.trim().toLowerCase());
+      if (known) { document.getElementById('userPass').focus(); }
+      else { doLogin(); }
+    }
+  });
+});
+
+const PRODUCT_BASE = [
+  {"name": "Балык", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Бекон", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Ветчина", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Ветчина пармская", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Вырезка говяжья", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Вырезка свинина", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Говядина Блейд", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Говядина Кострец", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Говядина Пиканья", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Говядина Рибай стейк", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Говядина Скерт стейк", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Говядина Стриплойн стейк", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Говядина Чак-ролл", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Голень индейки", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Грудка копченая (Фуршетное)", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Каре барана", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Карпаччо из птицы", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Колбаски говяжьи", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Колбаски куриные", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Колбаски рижские", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Колбаски свиные", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Котлета Бургер", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Крыло", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Наггетсы", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Паштет утиный", "category": "Мясо", "unit": "шт", "type": "Товар"},
+  {"name": "Паштет утка (Фуршетное)", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Печень куриная", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Ребрышки свиные", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Рибай очищенный", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Сало копченое/грудинка", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Тамбовский окорок", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Тушка курицы", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Фарш (котлетная масса)", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Филе бедра куриное", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Филе грудки индейки", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Филе грудки куриное", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Язык свиной", "category": "Мясо", "unit": "кг", "type": "Товар"},
+  {"name": "Бульон куриный п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Вырезка говяжья очищенная п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Индейка грудка на салат п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Индейка грудка очищенная п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Индейка на салат п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Кострец очищенный п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Котлета Куриная для бургера п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Крылья барбекю п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Куриные фрикадельки п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Печень куриная очищ. п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Пиканья очищенная п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Ребра свиные барбекю п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Ребрышки в медово-горчичном п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Ростбиф п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Рулет куриный п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Скерт очищенный п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Стриплойн очищенный п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Фарш на котлеты куриные (бизнес ланч) п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Фарш на котлеты куриные п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Фарш на котлеты свиные (бизнес ланч) п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Фарш на котлеты свиные п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Филе бедра куриное очищенное п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Филе грудки куриное очищенное п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Филе куриное для бургера п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Филе куриное су-вид п/ф (цезарь)", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Чак-ролл очищенный п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Шашлык из говядины п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Шашлык куриный с наршараб п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Шашлык курица п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Шашлык свинина п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Язык свиной отварной п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Язык свиной очищенный п/ф", "category": "Мясо", "unit": "кг", "type": "ПФ"},
+  {"name": "Горбуша с/м", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Икра", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Икра масаго", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Кальмар", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Крабовые палочки/мясо", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Креветки", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Креветки в темпуре", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Масляная рыба", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Мидии в раковинах", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Морской гребешок", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Морской коктейль", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Палтус п/х", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Палтус х/к (Банкетное)", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Семга (обрезь) на вителло тонато", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Семга с/м с/с", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Семга с/м с/с / Форель с/м", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Сибас с/м", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Скумбрия с/м", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Судак", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Треска филе", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Тунец филе", "category": "Рыба", "unit": "кг", "type": "Товар"},
+  {"name": "Кальмар очищенный п/ф", "category": "Рыба", "unit": "кг", "type": "ПФ"},
+  {"name": "Консервы горбуша п/ф", "category": "Рыба", "unit": "кг", "type": "ПФ"},
+  {"name": "Крабовый мусс п/ф", "category": "Рыба", "unit": "кг", "type": "ПФ"},
+  {"name": "Креветки очищенные п/ф", "category": "Рыба", "unit": "кг", "type": "ПФ"},
+  {"name": "Морской гребешок размор. п/ф", "category": "Рыба", "unit": "кг", "type": "ПФ"},
+  {"name": "Семга/форель соленая п/ф", "category": "Рыба", "unit": "кг", "type": "ПФ"},
+  {"name": "Треска разморож. п/ф", "category": "Рыба", "unit": "кг", "type": "ПФ"},
+  {"name": "Авокадо", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Айсберг", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Базилик", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Баклажаны", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Батат фри", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Брокколи", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Горошек в банке", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Зелень (петрушка, лук зеленый, укроп)", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Кабачки/Цукини", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Капуста б/к", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Капуста квашенная", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Капуста пекинская", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Картофель", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Картофель беби", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Картофель фри", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Кинза", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Кукуруза в банке", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Кукуруза с/м", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Лук жареный", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Лук красный", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Лук репка", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Микрозелень", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Микс салатный", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Морковь", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Мята", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Перец болгарский", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Перец горошек/душистый", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Перец чили", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Помидоры вяленые", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Помидоры маринованные", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Помидоры свежие", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Помидоры черри", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Редис", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Розмарин/тимьян", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Руккола", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Свекла", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Сельдерей", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Тыква", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Черемша", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Чеснок", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Шампиньоны", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Шпинат", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Щавель", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Эстрагон", "category": "Овощи", "unit": "кг", "type": "Товар"},
+  {"name": "Авокадо п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Айсберг очищенный п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Айсберг п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Баклажаны п/ф (без кожуры и жопок)", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Баклажаны п/ф (без кожуры)", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Брокколи п/ф (разм.)", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Грибной суп п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Жареные баклажаны на салат п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Зелень свежая п/ф (укроп/петрушка/лук зеленый)", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Кабачки/цукини (без жопок) п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Капуста б/к п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Капуста пекинская п/ф (без хряпки)", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Картофель отварной неочищ. п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Картофель отварной очищ. п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Картофель очищенный п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Картофельное пюре п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Кинза п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Лук красный чищенный п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Лук маринованный п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Лук репчатый чищеннный п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Микс салатов п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Морковь отварная п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Морковь очищенная п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Начинка грибы и картофель п/ф (варенники)", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Начинка на вареники с грибами и картофелем п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Пекинская капуста п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Перец Болгарский п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Редис очищенный п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Свекла отварная очищ. п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Сельдерей п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус сливочно-грибной п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Суп-пюре с шампиньонами база п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Томатная сальса п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Тыква очищенная п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Чеснок очищенный п/ф", "category": "Овощи", "unit": "кг", "type": "ПФ"},
+  {"name": "Айран/кефир", "category": "Молочка", "unit": "л", "type": "Товар"},
+  {"name": "Масло сливочное", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Молоко (кухня)", "category": "Молочка", "unit": "л", "type": "Товар"},
+  {"name": "Молоко кокосовое", "category": "Молочка", "unit": "л", "type": "Товар"},
+  {"name": "Сливки (Кухня)", "category": "Молочка", "unit": "л", "type": "Товар"},
+  {"name": "Сливки 20% (для Том Ям)", "category": "Молочка", "unit": "л", "type": "Товар"},
+  {"name": "Сметана", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Адыгейский", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Дор Блю", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Камамбер", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Пармезан/Грювер", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Российский", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Страчателла", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Сулугуни/Моцарелла", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Чеддер кг (Банкетное)", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр Чеддер ломтики", "category": "Молочка", "unit": "шт", "type": "Товар"},
+  {"name": "Сыр моцарела шарики", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр моцарелла шарики", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр мягкий Буррата", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр плавленый в ассорт.", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр с орехом", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр творожный", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сыр фета", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Сырные медальоны", "category": "Молочка", "unit": "шт", "type": "Товар"},
+  {"name": "Творог", "category": "Молочка", "unit": "кг", "type": "Товар"},
+  {"name": "Начинка на вареники с творогом п/ф", "category": "Молочка", "unit": "кг", "type": "ПФ"},
+  {"name": "Начинка творогом п/ф (варенники)", "category": "Молочка", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус Блю Чиз п/ф", "category": "Молочка", "unit": "кг", "type": "ПФ"},
+  {"name": "Сулугуни п/ф", "category": "Молочка", "unit": "кг", "type": "ПФ"},
+  {"name": "Сыр страчателла п/ф", "category": "Молочка", "unit": "кг", "type": "ПФ"},
+  {"name": "Ананас в банке", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Гречка", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Добавка для попкорна", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Дрожжи сухие", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Желатин", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Киноа белая", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Крахмал", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Кус-кус", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Макаронные изделия", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Манная крупа", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Мука", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Паста Том Ям", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Паста мисо", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Попкорн (зерна)", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Разрыхлитель для теста", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Рис", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Сухари панировочные", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Чипсы для жарки (креветочные)", "category": "Бакалея", "unit": "кг", "type": "Товар"},
+  {"name": "Гречка отварная п/ф", "category": "Бакалея", "unit": "кг", "type": "ПФ"},
+  {"name": "Макароны отварные п/ф", "category": "Бакалея", "unit": "кг", "type": "ПФ"},
+  {"name": "Рис отварной п/ф", "category": "Бакалея", "unit": "кг", "type": "ПФ"},
+  {"name": "Рис с овощами база п/ф", "category": "Бакалея", "unit": "кг", "type": "ПФ"},
+  {"name": "Сухарики Цезарь п/ф", "category": "Бакалея", "unit": "кг", "type": "ПФ"},
+  {"name": "Крупа пшено (Барашка)", "category": "Бакалея", "unit": "кг", "type": "Барашкино"},
+  {"name": "Чечевица (Барашка)", "category": "Бакалея", "unit": "кг", "type": "Барашкино"},
+  {"name": "Аджиномото", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Бальзамик крем", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Горчица", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Горчица зерно", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Кетчуп", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Майонез", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Паста томатная", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Пицца соус томатный", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус Демиглас", "category": "Соусы/Заправки", "unit": "л", "type": "Товар"},
+  {"name": "Соус барбекю", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус бургер", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус горчичный Астория", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус дип", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус наршараб", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус ореховый", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус сладкий чили", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус соевый", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус сырный", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус терияки", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус унаги", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус устричный (Фуршетное)", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус чесночный", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Соус шрирача", "category": "Соусы/Заправки", "unit": "кг", "type": "Товар"},
+  {"name": "Вишневый демиглас п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Греческая заправка п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Заправка Дача п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Заправка горчичная п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Майонез Том-Ям п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Масло зеленое п/ф", "category": "Соусы/Заправки", "unit": "л", "type": "ПФ"},
+  {"name": "Масло чесночное п/ф", "category": "Соусы/Заправки", "unit": "л", "type": "ПФ"},
+  {"name": "Соево-медовая заправка п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус Бешамель п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус Демигласс п/ф", "category": "Соусы/Заправки", "unit": "л", "type": "ПФ"},
+  {"name": "Соус Мюнхен п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус азиатский п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус вителло Тонато п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус гуакамоле-чили п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус демигласс п/ф", "category": "Соусы/Заправки", "unit": "л", "type": "ПФ"},
+  {"name": "Соус имбирный Айоле п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус песто п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус пикантный п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус сливочно-шафрановый п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус тар-тар п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус цезарь п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Соус ягодный п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Трюфельный майонез п/ф", "category": "Соусы/Заправки", "unit": "кг", "type": "ПФ"},
+  {"name": "Вино для кухни", "category": "Бакалея жидкая", "unit": "л", "type": "Товар"},
+  {"name": "Масло кунжутное", "category": "Бакалея жидкая", "unit": "л", "type": "Товар"},
+  {"name": "Масло растительное", "category": "Бакалея жидкая", "unit": "л", "type": "Товар"},
+  {"name": "Масло фритюрное", "category": "Бакалея жидкая", "unit": "л", "type": "Товар"},
+  {"name": "Трюфельное масло", "category": "Бакалея жидкая", "unit": "л", "type": "Товар"},
+  {"name": "Уксус", "category": "Бакалея жидкая", "unit": "кг", "type": "Товар"},
+  {"name": "Уксус винный в асс.", "category": "Бакалея жидкая", "unit": "кг", "type": "Товар"},
+  {"name": "Консервы горбуша", "category": "Консервы", "unit": "кг", "type": "Товар"},
+  {"name": "Консервы тунец", "category": "Консервы", "unit": "кг", "type": "Товар"},
+  {"name": "Маслины/Оливки", "category": "Консервы", "unit": "кг", "type": "Товар"},
+  {"name": "Огурцы маринованные", "category": "Консервы", "unit": "кг", "type": "Товар"},
+  {"name": "Персик консерв.", "category": "Консервы", "unit": "кг", "type": "Товар"},
+  {"name": "Сельдь в масле (филе)", "category": "Консервы", "unit": "кг", "type": "Товар"},
+  {"name": "Апельсин", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Виноград", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Груша", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Киви", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Клубника свежая", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Концентрат лимонный", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Лайм", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Лимон", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Мандарины", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Персик консервированный", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Яблоки", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Ягоды Вишня с/м", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Ягоды Клубника с/м", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Товар"},
+  {"name": "Карамелизированная груша п/ф", "category": "Фрукты/Ягоды", "unit": "кг", "type": "ПФ"},
+  {"name": "Лимонный дресинг п/ф (Банкетное)", "category": "Фрукты/Ягоды", "unit": "кг", "type": "ПФ"},
+  {"name": "Лимонный дрессинг п/ф", "category": "Фрукты/Ягоды", "unit": "кг", "type": "ПФ"},
+  {"name": "Чернослив (Барашка)", "category": "Фрукты/Ягоды", "unit": "кг", "type": "Барашкино"},
+  {"name": "Багет/батон", "category": "Хлеб/Выпечка", "unit": "кг", "type": "Товар"},
+  {"name": "Булочка Бриошь", "category": "Хлеб/Выпечка", "unit": "шт", "type": "Товар"},
+  {"name": "Лаваш", "category": "Хлеб/Выпечка", "unit": "кг", "type": "Товар"},
+  {"name": "Тарталетка", "category": "Хлеб/Выпечка", "unit": "шт", "type": "Товар"},
+  {"name": "Тарталетки", "category": "Хлеб/Выпечка", "unit": "шт", "type": "Товар"},
+  {"name": "Хлеб бородинский", "category": "Хлеб/Выпечка", "unit": "кг", "type": "Товар"},
+  {"name": "Гренки бородинские п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Начинка свино-говяжья п/ф (пельмени)", "category": "Хлеб/Выпечка", "unit": "л", "type": "ПФ"},
+  {"name": "Профитроль п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Тесто блинное п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Тесто для вареников п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Тесто для вареников/пельмени п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Тесто для пицццы п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Тесто для пиццы п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Тесто для пончиков п/ф", "category": "Хлеб/Выпечка", "unit": "кг", "type": "ПФ"},
+  {"name": "Тесто слоеное (зам, Барашка)", "category": "Хлеб/Выпечка", "unit": "кг", "type": "Барашкино"},
+  {"name": "Добавка для сахар.ваты", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Добавка для сахарной ваты (цвет.сахар)", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Мед", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Пюре фруктовое", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Сахар", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Сахарная пудра", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Специи в ассортименте", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Топпинг", "category": "Кондитерка", "unit": "кг", "type": "Товар"},
+  {"name": "Мороженое (кухня)", "category": "Заморозка", "unit": "кг", "type": "Товар"},
+  {"name": "Начинка с вишней п/ф (вареники)", "category": "Заморозка", "unit": "кг", "type": "ПФ"},
+  {"name": "Вода газ. кухня", "category": "Напитки", "unit": "л", "type": "Товар"},
+  {"name": "Вода фильтрованная бесплатная", "category": "Напитки", "unit": "л", "type": "Товар"},
+  {"name": "Квас", "category": "Напитки", "unit": "л", "type": "Товар"},
+  {"name": "Грудка копченая", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Десерты в ассорт.", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Имбирь", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Каперсы", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Кунжут", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Набор для бульона", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Овощи на индейку", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Огурцы свежие", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Орехи", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Пепперони нарезка", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Свиная шея", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Соль", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Стек для шашлыка", "category": "Прочее", "unit": "шт", "type": "Товар"},
+  {"name": "Стружка тунца", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Суп лапша", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Суп-пюре из тыквы", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Суповой набор", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Супчик со звездочками", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Халапенью", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Хрен", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Шафран", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Яйцо куриное", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Яйцо перепелиное", "category": "Прочее", "unit": "кг", "type": "Товар"},
+  {"name": "Блины п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Борщ п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Буженина запеченая п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Кляр п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Начинка на вареники с вишней п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Огурцы без хвостиков п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Свиная шея очищенная п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Солянка п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Суп-крем из тыквы база п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Суп-пюре из тыквы база п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Уха п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Холодец из птицы п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Холодные щи из щавля п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Холодный борщ п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Холодный свекольник п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Яблочная начинка для блинов п/ф", "category": "Прочее", "unit": "кг", "type": "ПФ"},
+  {"name": "Виноградный лист (Барашка)", "category": "Прочее", "unit": "кг", "type": "Барашкино"},
+  {"name": "Дорадо (Барашки)", "category": "Прочее", "unit": "кг", "type": "Барашкино"},
+  {"name": "Жир бараний (Барашка)", "category": "Прочее", "unit": "кг", "type": "Барашкино"},
+  {"name": "Карейка барана (Барашкина)", "category": "Прочее", "unit": "кг", "type": "Барашкино"},
+  {"name": "Куриные сердца (Барашка)", "category": "Прочее", "unit": "кг", "type": "Барашкино"},
+  {"name": "Люля свино-говяжий (Барашки)", "category": "Прочее", "unit": "л", "type": "Барашкино"},
+  {"name": "Мясо мидий (Барашка)", "category": "Прочее", "unit": "кг", "type": "Барашкино"},
+  {"name": "Шея говядины (Барашка)", "category": "Прочее", "unit": "кг", "type": "Барашкино"}
+];
+</script>
+</body>
+</html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Инвентаризация v3 — Кафе «Дача»</title>
 <style>
